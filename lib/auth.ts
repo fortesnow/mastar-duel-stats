@@ -76,7 +76,7 @@ export const signInWithGoogle = async () => {
   provider.addScope('profile');
   provider.addScope('email');
   
-  // プロンプト設定を変更（常に同意画面を表示）
+  // プロンプト設定を変更
   provider.setCustomParameters({
     prompt: 'select_account',
     login_hint: '',
@@ -87,17 +87,33 @@ export const signInWithGoogle = async () => {
     if (isMobileDevice()) {
       console.log('モバイルデバイスを検出: リダイレクト認証を使用');
       
-      // リダイレクト中であることをセッションストレージに記録（ローカルストレージよりもセッション単位）
+      // リダイレクト前の状態をクリア
       if (typeof window !== 'undefined') {
+        console.log('リダイレクト前の状態をクリア');
+        sessionStorage.removeItem('auth_redirect_in_progress');
+        sessionStorage.removeItem('auth_redirect_from');
+        
+        // 新しい状態を設定
+        console.log('新しいリダイレクト状態を設定:', window.location.pathname);
         sessionStorage.setItem('auth_redirect_in_progress', 'true');
-        // リダイレクト元のパスを保存
         sessionStorage.setItem('auth_redirect_from', window.location.pathname);
       }
       
-      // リダイレクト認証を実行
-      await signInWithRedirect(auth, provider);
+      console.log('signInWithRedirect を呼び出し中...');
+      try {
+        // リダイレクト認証を実行
+        await signInWithRedirect(auth, provider).catch(e => {
+          console.error('リダイレクト中のエラー:', e);
+          throw e;
+        });
+        
+        // この行は通常実行されない（リダイレクトが成功した場合）
+        console.log('リダイレクト後のコード - これは通常表示されません');
+      } catch (redirectError) {
+        console.error('リダイレクト実行エラー:', redirectError);
+        throw redirectError;
+      }
       
-      // リダイレクトが開始されるとこの行は実行されない（ページが遷移するため）
       return { success: true, redirectStarted: true };
     } else {
       console.log('デスクトップデバイスを検出: ポップアップ認証を使用');
@@ -132,6 +148,9 @@ export const signInWithGoogle = async () => {
         case 'auth/operation-not-allowed':
           errorMessage = 'この認証方法は現在無効になっています。管理者に連絡してください。';
           break;
+        default:
+          errorMessage = `ログインエラー: ${error.code}`;
+          break;
       }
       
       return { success: false, error: errorMessage, code: error.code };
@@ -143,66 +162,86 @@ export const signInWithGoogle = async () => {
 
 // リダイレクト結果を処理する関数
 export const handleRedirectResult = async () => {
-  // セッションストレージを使用
-  const redirectInProgress = typeof window !== 'undefined' ? 
-    sessionStorage.getItem('auth_redirect_in_progress') : null;
+  // ページロード時に常にリダイレクト結果を確認
+  console.log('リダイレクト状態チェック');
   
-  if (redirectInProgress === 'true') {
-    try {
-      console.log('リダイレクト認証結果を処理中...');
-      const result = await getRedirectResult(auth);
-      
-      // リダイレクト元のパスを取得（デフォルトは/duels）
-      const redirectFrom = typeof window !== 'undefined' ? 
-        sessionStorage.getItem('auth_redirect_from') : null;
-      
-      // リダイレクトプロセスが完了したらフラグをクリア
-      if (typeof window !== 'undefined') {
-        sessionStorage.removeItem('auth_redirect_in_progress');
-        sessionStorage.removeItem('auth_redirect_from');
-      }
-      
-      if (result) {
-        const user = result.user;
-        console.log('リダイレクト認証成功:', user);
-        return { success: true, user, redirectFrom };
-      } else {
-        console.log('リダイレクト結果がありません（初回ロードまたはリダイレクト前）');
-        return { success: false, error: null, redirectFrom };
-      }
-    } catch (error) {
-      console.error('リダイレクト認証エラー:', error);
-      
-      // リダイレクトプロセスが失敗してもフラグをクリア
-      if (typeof window !== 'undefined') {
-        sessionStorage.removeItem('auth_redirect_in_progress');
-        sessionStorage.removeItem('auth_redirect_from');
-      }
-      
-      if (error instanceof FirebaseError) {
-        console.error(`Firebase リダイレクトエラーコード: ${error.code}`);
-        let errorMessage = 'ログイン中にエラーが発生しました。';
-        
-        switch(error.code) {
-          case 'auth/unauthorized-domain':
-            errorMessage = 'このドメインはFirebaseで承認されていません。管理者に連絡してください。';
-            break;
-          case 'auth/invalid-credential':
-            errorMessage = '認証情報が無効です。もう一度お試しください。';
-            break;
-          case 'auth/missing-or-invalid-nonce':
-            errorMessage = '認証セッションが無効です。もう一度ログインしてください。';
-            break;
-        }
-        
-        return { success: false, error: errorMessage, code: error.code };
-      }
-      
-      return { success: false, error: '不明なエラーが発生しました。もう一度お試しください。' };
+  try {
+    // sessionStorageの状態に関わらず、常に結果を確認
+    console.log('getRedirectResult を実行...');
+    const result = await getRedirectResult(auth);
+    
+    // リダイレクト元のパスを取得
+    const redirectFrom = typeof window !== 'undefined' ? 
+      sessionStorage.getItem('auth_redirect_from') : null;
+    
+    console.log('リダイレクト元:', redirectFrom);
+    
+    // リダイレクト中フラグを取得
+    const redirectInProgress = typeof window !== 'undefined' ? 
+      sessionStorage.getItem('auth_redirect_in_progress') : null;
+    
+    console.log('リダイレクト中フラグ:', redirectInProgress);
+    
+    // セッションストレージをクリア
+    if (typeof window !== 'undefined') {
+      sessionStorage.removeItem('auth_redirect_in_progress');
+      sessionStorage.removeItem('auth_redirect_from');
     }
+    
+    if (result) {
+      // 認証情報が取得できた場合
+      const user = result.user;
+      console.log('リダイレクト認証成功:', user.uid);
+      return { success: true, user, redirectFrom };
+    } else {
+      // 認証情報がない場合
+      if (redirectInProgress === 'true') {
+        console.log('リダイレクト中だが結果がない - リダイレクトが失敗した可能性');
+        return { 
+          success: false, 
+          error: 'ログイン処理が正常に完了しませんでした。もう一度お試しください。', 
+          redirectFrom 
+        };
+      }
+      
+      console.log('リダイレクト結果がありません（初回ロードまたはリダイレクト前）');
+      return { success: false, error: null, redirectFrom };
+    }
+  } catch (error) {
+    console.error('リダイレクト認証エラー:', error);
+    
+    // リダイレクトプロセスが失敗してもフラグをクリア
+    if (typeof window !== 'undefined') {
+      sessionStorage.removeItem('auth_redirect_in_progress');
+      sessionStorage.removeItem('auth_redirect_from');
+    }
+    
+    if (error instanceof FirebaseError) {
+      console.error(`Firebase リダイレクトエラーコード: ${error.code}`);
+      console.error(`Firebase リダイレクトエラーメッセージ: ${error.message}`);
+      
+      let errorMessage = 'ログイン中にエラーが発生しました。';
+      
+      switch(error.code) {
+        case 'auth/unauthorized-domain':
+          errorMessage = 'このドメインはFirebaseで承認されていません。管理者に連絡してください。';
+          break;
+        case 'auth/invalid-credential':
+          errorMessage = '認証情報が無効です。もう一度お試しください。';
+          break;
+        case 'auth/missing-or-invalid-nonce':
+          errorMessage = '認証セッションが無効です。もう一度ログインしてください。';
+          break;
+        default:
+          errorMessage = `認証エラー: ${error.code}`;
+          break;
+      }
+      
+      return { success: false, error: errorMessage, code: error.code };
+    }
+    
+    return { success: false, error: '不明なエラーが発生しました。もう一度お試しください。' };
   }
-  
-  return { success: false, error: null };
 };
 
 // サインアウト（ログアウト）
