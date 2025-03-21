@@ -17,9 +17,9 @@ service cloud.firestore {
       }
     }
     
-    // 開発/テスト用（必ず本番環境では削除すること）
-    // match /{document=**} {
-    //   allow read, write: if true;
-    // }
+    // 一時的なデバッグルール - 本番環境では必ず削除すること
+    match /{document=**} {
+      allow read, write: if true;
+    }
   }
 }

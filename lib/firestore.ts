@@ -124,4 +124,19 @@ export const getDeckDuelRecords = async (userId: string, deckId: string) => {
       timestamp: data.timestamp ? (data.timestamp as Timestamp).toDate() : new Date()
     } as DuelRecord;
   });
+};
+
+// 過去に登録された対戦相手のデッキ名を取得（重複なし）
+export const getOpponentDeckNames = async (userId: string) => {
+  const duelsRef = collection(db, getUserDuelsPath(userId));
+  const duelsSnapshot = await getDocs(duelsRef);
+  
+  // 対戦相手のデッキ名を抽出し、重複を除去
+  const deckNames = duelsSnapshot.docs
+    .map(doc => doc.data().opponentDeckName)
+    .filter((value, index, self) => 
+      value && self.indexOf(value) === index
+    );
+  
+  return deckNames;
 }; 
