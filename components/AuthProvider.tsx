@@ -29,8 +29,17 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
   useEffect(() => {
     const processRedirectResult = async () => {
       try {
-        await handleRedirectResult();
-        // リダイレクト結果の処理後、onAuthStateChangedがユーザー状態を更新します
+        console.log('リダイレクト結果を処理中...');
+        const user = await handleRedirectResult();
+        // リダイレクト認証成功でユーザーが取得できた場合
+        if (user) {
+          console.log('リダイレクト認証成功、ルートを変更します');
+          // ログイン後のページにリダイレクト
+          // ログイン・登録画面にいる場合は対戦記録ページへ
+          if (pathname === '/login' || pathname === '/signup') {
+            router.push('/duels');
+          }
+        }
       } catch (error) {
         console.error('リダイレクト認証処理エラー:', error);
         setLoading(false);
@@ -38,7 +47,7 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
     };
     
     processRedirectResult();
-  }, []);
+  }, [pathname, router]);
 
   // 認証状態の監視
   useEffect(() => {

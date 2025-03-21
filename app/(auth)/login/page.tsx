@@ -58,6 +58,8 @@ export default function Login() {
       
       if (isMobile) {
         setIsRedirecting(true);
+        // モバイルの場合、認証完了後にリダイレクトされるので
+        // ここに保存しておく状態があれば保存する
       }
       
       await signInWithGoogle();
@@ -73,7 +75,31 @@ export default function Login() {
       
       // エラーメッセージを取得
       if (err instanceof Error) {
-        setError(err.message);
+        // エラーメッセージをユーザーフレンドリーに表示
+        let userMessage = err.message;
+        
+        // Firebase特定のエラーコードの場合は詳細情報を追加
+        const firebaseError = err as FirebaseError;
+        if (firebaseError.code) {
+          console.error('エラーコード:', firebaseError.code);
+          if (firebaseError.code === 'auth/unauthorized-domain') {
+            userMessage = 'このドメインはGoogle認証で許可されていません。管理者に連絡してください。';
+          } else if (firebaseError.code === 'auth/invalid-credential') {
+            userMessage = 'Google認証の資格情報が無効です。別のGoogleアカウントで試すか、他のログイン方法をお試しください。';
+          } else if (firebaseError.code === 'auth/popup-closed-by-user') {
+            userMessage = '認証ウィンドウが閉じられました。もう一度お試しください。';
+          }
+        }
+        
+        // モバイルデバイスでのエラーの場合、追加情報を表示
+        const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+          navigator.userAgent
+        );
+        if (isMobileDevice) {
+          userMessage += ' モバイルブラウザでの認証で問題が発生しました。WiFi接続を確認するか、PCからログインしてみてください。';
+        }
+        
+        setError(userMessage);
       } else {
         setError('Googleログイン中にエラーが発生しました。もう一度お試しください');
       }
@@ -111,7 +137,13 @@ export default function Login() {
           <div className="text-center py-4">
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500 mx-auto mb-4"></div>
             <p className="text-gray-600">Googleアカウントでログイン中です。リダイレクトしています...</p>
-            <p className="text-sm text-gray-500 mt-2">ブラウザの認証ポップアップでログインを完了してください</p>
+            <p className="text-sm text-gray-500 mt-2">ログインページが表示されたら、Googleアカウントを選択してください</p>
+            <button 
+              onClick={() => setIsRedirecting(false)}
+              className="mt-4 text-purple-600 underline text-sm"
+            >
+              キャンセル
+            </button>
           </div>
         ) : (
           <button
