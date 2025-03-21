@@ -60,9 +60,9 @@ export const signInWithGoogle = async () => {
     provider.addScope('profile');
     provider.addScope('email');
     
-    // プロンプト動作をカスタマイズ（常に選択画面を表示）
+    // プロンプト動作をカスタマイズ（アカウント選択画面を必要な場合のみ表示）
     provider.setCustomParameters({
-      prompt: 'select_account'
+      prompt: 'none'
     });
     
     // リダイレクト認証に変更（ポップアップの代わり）

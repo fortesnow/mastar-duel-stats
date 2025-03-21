@@ -1,7 +1,7 @@
 // Firebase設定
 import { initializeApp } from 'firebase/app';
 import { getFirestore, Firestore } from 'firebase/firestore';
-import { getAuth, connectAuthEmulator, Auth } from 'firebase/auth';
+import { getAuth, connectAuthEmulator, Auth, setPersistence, browserLocalPersistence } from 'firebase/auth';
 
 // Firebaseの設定値
 // 実際の値は環境変数から取得するか、プロジェクト設定から取得します
@@ -32,6 +32,15 @@ try {
   app = initializeApp(firebaseConfig);
   db = getFirestore(app);
   auth = getAuth(app);
+  
+  // 認証の永続性をLOCALに設定（ブラウザを閉じても認証状態を保持）
+  setPersistence(auth, browserLocalPersistence)
+    .then(() => {
+      console.log('Firebase認証永続性設定成功: ログイン状態が保持されます');
+    })
+    .catch((error) => {
+      console.error('Firebase認証永続性設定エラー:', error);
+    });
   
   // 開発環境の場合、Firebase Auth Emulatorに接続（必要に応じて）
   if (process.env.NODE_ENV === 'development' && process.env.NEXT_PUBLIC_USE_FIREBASE_EMULATOR === 'true') {
