@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { signInWithGoogle } from '../../../lib/auth';
 import { FirebaseError } from 'firebase/app';
@@ -15,6 +15,17 @@ export default function Login() {
     typeof window !== 'undefined' ? window.navigator.userAgent : ''
   );
 
+  // リダイレクト中かどうかのチェック
+  useEffect(() => {
+    // セッションストレージを確認
+    const redirectInProgress = typeof window !== 'undefined' ? 
+      sessionStorage.getItem('auth_redirect_in_progress') : null;
+    
+    if (redirectInProgress === 'true') {
+      setIsRedirecting(true);
+    }
+  }, []);
+
   const handleGoogleSignIn = async () => {
     try {
       setError(null);
@@ -26,8 +37,13 @@ export default function Login() {
       
       const result = await signInWithGoogle();
       
+      // モバイルのリダイレクト処理が始まった場合は、このコードは実行されない
+      // （ページ遷移が発生するため）
+      
       if (result.success) {
-        router.push('/duels');
+        if (!result.redirectStarted) { // デスクトップでの認証成功（ポップアップ）
+          router.push('/duels');
+        }
       } else if (result.error) {
         setError(result.error);
         setIsRedirecting(false);
@@ -65,6 +81,15 @@ export default function Login() {
     }
   };
 
+  const handleCancelRedirect = () => {
+    // リダイレクト状態をクリア
+    setIsRedirecting(false);
+    if (typeof window !== 'undefined') {
+      sessionStorage.removeItem('auth_redirect_in_progress');
+      sessionStorage.removeItem('auth_redirect_from');
+    }
+  };
+
   return (
     <div className="flex min-h-screen flex-col items-center justify-center p-4 bg-gray-900">
       <div className="w-full max-w-md p-8 space-y-8 bg-gray-800 rounded-xl shadow-2xl">
@@ -85,7 +110,7 @@ export default function Login() {
             <p className="text-white">Googleアカウントにリダイレクトしています...</p>
             <p className="text-gray-400 text-sm">ブラウザの認証画面に移動します。しばらくお待ちください。</p>
             <button
-              onClick={() => setIsRedirecting(false)}
+              onClick={handleCancelRedirect}
               className="px-4 py-2 mt-4 text-sm text-white bg-red-600 rounded hover:bg-red-700"
             >
               キャンセル

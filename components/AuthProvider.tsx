@@ -30,25 +30,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
 
-  useEffect(() => {
-    // リダイレクト結果の処理
+  // リダイレクト結果を処理する関数
+  const processRedirectResult = async () => {
     console.log('リダイレクト結果の処理を開始');
-    handleRedirectResult().then((result) => {
+    try {
+      const result = await handleRedirectResult();
       console.log('リダイレクト結果処理完了:', result);
 
       // ユーザーが認証されていて、ログインページまたはサインアップページにいる場合、duelsページにリダイレクト
-      if (result.success && result.user && (
-        pathname === '/login' || 
-        pathname === '/signup'
-      )) {
-        router.push('/duels');
+      if (result.success && result.user) {
+        // リダイレクト元があれば、そこに戻る（なければduelsページへ）
+        const redirectTo = result.redirectFrom || '/duels';
+        console.log('リダイレクト先:', redirectTo);
+        router.push(redirectTo);
       }
-    }).catch(error => {
+    } catch (error) {
       console.error('リダイレクト結果処理エラー:', error);
-    });
+    }
+  };
 
+  useEffect(() => {
+    // コンポーネントマウント時にリダイレクト結果を処理
+    processRedirectResult();
+    
     // ユーザー認証状態の監視
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      console.log('認証状態変更:', currentUser ? `ユーザー: ${currentUser.uid}` : 'ログアウト状態');
       setFirebaseUser(currentUser);
       
       // Firebaseユーザーをアプリケーションのユーザー型に変換
@@ -65,6 +72,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           }
         };
         setUser(appUser);
+        
+        // ユーザーがログイン済みで認証ページにいる場合はduelsにリダイレクト
+        if (pathname === '/login' || pathname === '/signup') {
+          router.push('/duels');
+        }
       } else {
         setUser(null);
       }

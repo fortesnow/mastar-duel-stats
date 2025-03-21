@@ -78,24 +78,27 @@ export const signInWithGoogle = async () => {
   
   // プロンプト設定を変更（常に同意画面を表示）
   provider.setCustomParameters({
-    prompt: 'consent',
-    // モバイルフレンドリーなUIをリクエスト
-    mobile: '1',
-    ...typeof window !== 'undefined' && {
-      redirect_uri: window.location.origin
-    }
+    prompt: 'select_account',
+    login_hint: '',
   });
 
   try {
     // モバイルデバイスの場合はリダイレクト認証を使用
     if (isMobileDevice()) {
       console.log('モバイルデバイスを検出: リダイレクト認証を使用');
-      // リダイレクト中であることをローカルストレージに記録
+      
+      // リダイレクト中であることをセッションストレージに記録（ローカルストレージよりもセッション単位）
       if (typeof window !== 'undefined') {
-        localStorage.setItem('auth_redirect_in_progress', 'true');
+        sessionStorage.setItem('auth_redirect_in_progress', 'true');
+        // リダイレクト元のパスを保存
+        sessionStorage.setItem('auth_redirect_from', window.location.pathname);
       }
+      
+      // リダイレクト認証を実行
       await signInWithRedirect(auth, provider);
-      return { success: true };
+      
+      // リダイレクトが開始されるとこの行は実行されない（ページが遷移するため）
+      return { success: true, redirectStarted: true };
     } else {
       console.log('デスクトップデバイスを検出: ポップアップ認証を使用');
       const result = await signInWithPopup(auth, provider);
@@ -140,26 +143,41 @@ export const signInWithGoogle = async () => {
 
 // リダイレクト結果を処理する関数
 export const handleRedirectResult = async () => {
-  if (typeof window !== 'undefined' && localStorage.getItem('auth_redirect_in_progress') === 'true') {
+  // セッションストレージを使用
+  const redirectInProgress = typeof window !== 'undefined' ? 
+    sessionStorage.getItem('auth_redirect_in_progress') : null;
+  
+  if (redirectInProgress === 'true') {
     try {
       console.log('リダイレクト認証結果を処理中...');
       const result = await getRedirectResult(auth);
       
+      // リダイレクト元のパスを取得（デフォルトは/duels）
+      const redirectFrom = typeof window !== 'undefined' ? 
+        sessionStorage.getItem('auth_redirect_from') : null;
+      
       // リダイレクトプロセスが完了したらフラグをクリア
-      localStorage.removeItem('auth_redirect_in_progress');
+      if (typeof window !== 'undefined') {
+        sessionStorage.removeItem('auth_redirect_in_progress');
+        sessionStorage.removeItem('auth_redirect_from');
+      }
       
       if (result) {
         const user = result.user;
         console.log('リダイレクト認証成功:', user);
-        return { success: true, user };
+        return { success: true, user, redirectFrom };
       } else {
         console.log('リダイレクト結果がありません（初回ロードまたはリダイレクト前）');
-        return { success: false, error: null };
+        return { success: false, error: null, redirectFrom };
       }
     } catch (error) {
       console.error('リダイレクト認証エラー:', error);
+      
       // リダイレクトプロセスが失敗してもフラグをクリア
-      localStorage.removeItem('auth_redirect_in_progress');
+      if (typeof window !== 'undefined') {
+        sessionStorage.removeItem('auth_redirect_in_progress');
+        sessionStorage.removeItem('auth_redirect_from');
+      }
       
       if (error instanceof FirebaseError) {
         console.error(`Firebase リダイレクトエラーコード: ${error.code}`);
@@ -171,6 +189,9 @@ export const handleRedirectResult = async () => {
             break;
           case 'auth/invalid-credential':
             errorMessage = '認証情報が無効です。もう一度お試しください。';
+            break;
+          case 'auth/missing-or-invalid-nonce':
+            errorMessage = '認証セッションが無効です。もう一度ログインしてください。';
             break;
         }
         
