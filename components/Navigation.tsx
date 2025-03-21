@@ -61,7 +61,7 @@ export default function Navigation() {
         {({ open, close }) => (
           <>
             <div className="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
-              <div className="relative flex h-14 sm:h-16 items-center justify-between">
+              <div className="relative flex h-16 sm:h-18 items-center justify-between">
                 <div className="absolute inset-y-0 left-0 flex items-center sm:hidden">
                   {/* モバイルメニューボタン */}
                   <Disclosure.Button className="relative inline-flex items-center justify-center rounded-md p-2 text-purple-200 hover:bg-purple-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white">
@@ -76,18 +76,19 @@ export default function Navigation() {
                 </div>
                 
                 <div className="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start">
-                  <div className="flex flex-shrink-0 items-center">
-                    <Link href="/">
+                  <div className="flex flex-shrink-0 items-center pl-2 sm:pl-0">
+                    <Link href="/" className="block hover:opacity-90 transition-opacity">
                       <Image
                         src="/stats-logo.png"
                         alt="Master Duel Stats"
-                        width={isMobile ? 150 : 180}
-                        height={isMobile ? 30 : 40}
-                        className="h-7 sm:h-8 w-auto"
+                        width={isMobile ? 180 : 220}
+                        height={isMobile ? 40 : 50}
+                        className="h-9 sm:h-11 w-auto drop-shadow-md"
+                        priority
                       />
                     </Link>
                   </div>
-                  <div className="hidden sm:ml-6 sm:block">
+                  <div className="hidden sm:ml-8 sm:block">
                     <div className="flex space-x-4">
                       {authenticatedNavigation.map((item) => (
                         <Link
@@ -234,7 +235,7 @@ export default function Navigation() {
       {/* モバイル用の下部タブナビゲーション */}
       {isMobile && user && (
         <div className="fixed bottom-0 left-0 right-0 bg-purple-900 border-t border-purple-800 z-10">
-          <div className="grid grid-cols-4 h-14">
+          <div className="grid grid-cols-4 h-16">
             {navigation.map((item) => (
               <Link
                 key={item.name}
@@ -243,7 +244,7 @@ export default function Navigation() {
                   item.current
                     ? 'text-white bg-purple-800'
                     : 'text-purple-300 hover:bg-purple-800 hover:text-white',
-                  'flex flex-col items-center justify-center text-xs font-medium'
+                  'flex flex-col items-center justify-center text-xs font-medium pt-2'
                 )}
               >
                 <item.icon
@@ -261,7 +262,7 @@ export default function Navigation() {
       )}
       
       {/* モバイル用の下部ナビゲーションのスペーサー */}
-      {isMobile && user && <div className="h-14"></div>}
+      {isMobile && user && <div className="h-16"></div>}
     </>
   );
 } 
