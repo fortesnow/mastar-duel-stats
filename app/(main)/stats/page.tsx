@@ -231,14 +231,14 @@ export default function Stats() {
       legend: {
         position: 'top',
         labels: {
-          color: 'rgba(156, 163, 175, 1)',
+          color: 'rgba(229, 231, 235, 1)',
           font: {
             size: 12
           }
         }
       },
       tooltip: {
-        backgroundColor: 'rgba(17, 24, 39, 0.8)',
+        backgroundColor: 'rgba(17, 24, 39, 0.9)',
         titleColor: '#fff',
         bodyColor: '#fff',
         padding: 12,
@@ -259,14 +259,14 @@ export default function Stats() {
       legend: {
         position: 'top',
         labels: {
-          color: 'rgba(156, 163, 175, 1)',
+          color: 'rgba(229, 231, 235, 1)',
           font: {
             size: 12
           }
         }
       },
       tooltip: {
-        backgroundColor: 'rgba(17, 24, 39, 0.8)',
+        backgroundColor: 'rgba(17, 24, 39, 0.9)',
         titleColor: '#fff',
         bodyColor: '#fff',
         padding: 12,
@@ -282,18 +282,18 @@ export default function Stats() {
         min: 0,
         max: 100,
         ticks: {
-          color: 'rgba(156, 163, 175, 1)',
+          color: 'rgba(229, 231, 235, 1)',
           callback: function(value) {
             return value + '%';
           }
         },
         grid: {
-          color: 'rgba(107, 114, 128, 0.1)'
+          color: 'rgba(75, 85, 99, 0.2)'
         }
       },
       x: {
         ticks: {
-          color: 'rgba(156, 163, 175, 1)'
+          color: 'rgba(229, 231, 235, 1)'
         },
         grid: {
           display: false
@@ -311,9 +311,9 @@ export default function Stats() {
   }
 
   return (
-    <div className="bg-white/70 dark:bg-gray-800/70 shadow-sm rounded-lg p-6">
+    <div className="bg-[#112233]/90 dark:bg-[#112233]/90 shadow-sm rounded-lg p-6">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">デュエル統計</h1>
+        <h1 className="text-2xl font-bold text-gray-100 dark:text-white">デュエル統計</h1>
       </div>
       
       {error && (
@@ -334,12 +334,12 @@ export default function Stats() {
         <>
           {/* デッキフィルター */}
           <div className="mb-6">
-            <label htmlFor="deckFilter" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label htmlFor="deckFilter" className="block text-sm font-medium text-white dark:text-white mb-2">
               デッキフィルター
             </label>
             <select
               id="deckFilter"
-              className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+              className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-600 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md bg-[#193549] dark:bg-[#193549] text-white dark:text-white"
               value={filterDeckId}
               onChange={(e) => setFilterDeckId(e.target.value)}
             >
@@ -354,24 +354,24 @@ export default function Stats() {
           
           {/* メイン統計データ */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-            <div className="bg-white dark:bg-gray-700 rounded-lg shadow p-4">
-              <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">総デュエル数</h3>
-              <p className="text-3xl font-bold text-gray-900 dark:text-white">{statistics?.totalDuels || 0}</p>
+            <div className="bg-[#193549] dark:bg-[#193549] rounded-lg shadow p-4">
+              <h3 className="text-sm font-medium text-gray-300 dark:text-gray-300">総デュエル数</h3>
+              <p className="text-3xl font-bold text-white dark:text-white">{statistics?.totalDuels || 0}</p>
             </div>
             
-            <div className="bg-white dark:bg-gray-700 rounded-lg shadow p-4">
-              <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">勝利数</h3>
-              <p className="text-3xl font-bold text-green-600 dark:text-green-400">{statistics?.wins || 0}</p>
+            <div className="bg-[#193549] dark:bg-[#193549] rounded-lg shadow p-4">
+              <h3 className="text-sm font-medium text-gray-300 dark:text-gray-300">勝利数</h3>
+              <p className="text-3xl font-bold text-green-400 dark:text-green-400">{statistics?.wins || 0}</p>
             </div>
             
-            <div className="bg-white dark:bg-gray-700 rounded-lg shadow p-4">
-              <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">敗北数</h3>
-              <p className="text-3xl font-bold text-red-600 dark:text-red-400">{statistics?.losses || 0}</p>
+            <div className="bg-[#193549] dark:bg-[#193549] rounded-lg shadow p-4">
+              <h3 className="text-sm font-medium text-gray-300 dark:text-gray-300">敗北数</h3>
+              <p className="text-3xl font-bold text-red-400 dark:text-red-400">{statistics?.losses || 0}</p>
             </div>
             
-            <div className="bg-white dark:bg-gray-700 rounded-lg shadow p-4">
-              <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">総合勝率</h3>
-              <p className="text-3xl font-bold text-purple-600 dark:text-purple-400">
+            <div className="bg-[#193549] dark:bg-[#193549] rounded-lg shadow p-4">
+              <h3 className="text-sm font-medium text-gray-300 dark:text-gray-300">総合勝率</h3>
+              <p className="text-3xl font-bold text-yellow-400 dark:text-yellow-400">
                 {statistics ? statistics.winRate.toFixed(1) : 0}%
               </p>
             </div>
@@ -379,39 +379,39 @@ export default function Stats() {
           
           {/* 勝敗グラフ */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-            <div className="bg-white dark:bg-gray-700 rounded-lg shadow p-4">
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">勝敗分布</h3>
+            <div className="bg-[#193549] dark:bg-[#193549] rounded-lg shadow p-4">
+              <h3 className="text-lg font-medium text-gray-200 dark:text-gray-200 mb-4">勝敗分布</h3>
               <div className="h-64">
                 <Pie data={winLossData} options={pieOptions} />
               </div>
             </div>
             
-            <div className="bg-white dark:bg-gray-700 rounded-lg shadow p-4">
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">先攻/後攻別勝率</h3>
+            <div className="bg-[#193549] dark:bg-[#193549] rounded-lg shadow p-4">
+              <h3 className="text-lg font-medium text-gray-200 dark:text-gray-200 mb-4">先攻/後攻別勝率</h3>
               <div className="h-64">
                 <Bar data={turnOrderData} options={barOptions} />
               </div>
               
               {/* 先攻/後攻の詳細データ */}
               <div className="mt-4 grid grid-cols-2 gap-4">
-                <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded">
-                  <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400">先攻</h4>
-                  <p className="text-lg font-bold text-purple-600 dark:text-purple-400">
+                <div className="bg-[#0F2537] dark:bg-[#0F2537] p-3 rounded">
+                  <h4 className="text-sm font-medium text-gray-300 dark:text-gray-300">先攻</h4>
+                  <p className="text-lg font-bold text-purple-400 dark:text-purple-400">
                     {statistics ? statistics.firstPlayerWinRate.toFixed(1) : 0}%
                   </p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                  <p className="text-xs text-gray-400 dark:text-gray-400">
                     ({statistics && statistics.totalDuels > 0 
                       ? `${Math.round((statistics.totalDuels - duelRecords.filter(r => !r.isFirstPlayer).length) / statistics.totalDuels * 100)}%の試合で先攻` 
                       : '0%の試合で先攻'})
                   </p>
                 </div>
                 
-                <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded">
-                  <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400">後攻</h4>
-                  <p className="text-lg font-bold text-indigo-600 dark:text-indigo-400">
+                <div className="bg-[#0F2537] dark:bg-[#0F2537] p-3 rounded">
+                  <h4 className="text-sm font-medium text-gray-300 dark:text-gray-300">後攻</h4>
+                  <p className="text-lg font-bold text-indigo-400 dark:text-indigo-400">
                     {statistics ? statistics.secondPlayerWinRate.toFixed(1) : 0}%
                   </p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                  <p className="text-xs text-gray-400 dark:text-gray-400">
                     ({statistics && statistics.totalDuels > 0 
                       ? `${Math.round(duelRecords.filter(r => !r.isFirstPlayer).length / statistics.totalDuels * 100)}%の試合で後攻` 
                       : '0%の試合で後攻'})
@@ -422,103 +422,145 @@ export default function Stats() {
           </div>
           
           {/* デッキ別勝率 */}
-          <div className="bg-white dark:bg-gray-700 rounded-lg shadow p-4 mb-8">
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">デッキ別勝率</h3>
+          <div className="bg-[#193549] dark:bg-[#193549] rounded-lg shadow p-4 mb-8">
+            <h3 className="text-lg font-medium text-gray-200 dark:text-gray-200 mb-4">デッキ別勝率</h3>
             <div className="h-80">
               <Bar data={deckWinRateData} options={barOptions} />
             </div>
           </div>
           
-          {/* デッキ別詳細 */}
-          <div className="card-bg-transparent shadow rounded-lg p-6 mb-8">
-            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">デッキ別成績</h3>
+          {/* デッキ別成績 */}
+          <div className="bg-[#193549] dark:bg-[#193549] rounded-lg shadow p-4 mb-8">
+            <h3 className="text-xl font-semibold text-gray-200 dark:text-white mb-4">デッキ別成績</h3>
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700 table-bg-transparent">
-                <thead className="bg-gray-50/90 dark:bg-gray-700/90">
-                  <tr>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                      デッキ
-                    </th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                      勝利
-                    </th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                      敗北
-                    </th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                      勝率
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                  {statistics && decks && Object.keys(statistics.deckStats).map((deckId) => {
-                    const deck = decks.find(d => d.id === deckId);
-                    const stats = statistics.deckStats[deckId];
-                    return (
-                      <tr key={deckId} className="hover:bg-gray-50 dark:hover:bg-gray-700">
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-                          {deck ? deck.name : deckId}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-green-600 dark:text-green-400">
-                          {stats.wins}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-red-600 dark:text-red-400">
-                          {stats.losses}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-600 dark:text-blue-400">
-                          {stats.winRate.toFixed(1)}%
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+              {/* テーブルヘッダー */}
+              <div className="bg-[#193549] dark:bg-[#193549] rounded-t-md overflow-hidden grid grid-cols-4 text-center py-3 mb-1">
+                <div className="text-gray-200 font-medium">デッキ</div>
+                <div className="text-gray-200 font-medium">勝利</div>
+                <div className="text-gray-200 font-medium">敗北</div>
+                <div className="text-gray-200 font-medium">勝率</div>
+              </div>
+              
+              {/* テーブルボディ */}
+              <div className="space-y-1">
+                {statistics && decks && Object.keys(statistics.deckStats).map((deckId) => {
+                  const deck = decks.find(d => d.id === deckId);
+                  const stats = statistics.deckStats[deckId];
+                  const winRate = stats.winRate;
+                  return (
+                    <div key={deckId} className="relative">
+                      {/* 左側の勝率を示すバー - 勝率が高いほど色が濃くなる */}
+                      <div 
+                        className={`absolute left-0 top-0 bottom-0 w-1.5 ${
+                          winRate >= 60 
+                            ? 'bg-yellow-400' 
+                            : winRate >= 50 
+                              ? 'bg-green-400' 
+                              : winRate >= 30
+                                ? 'bg-blue-400'
+                                : 'bg-gray-400'
+                        }`}
+                      ></div>
+                      
+                      {/* テーブル行 */}
+                      <div className="ml-1.5">
+                        {/* テーブルセル */}
+                        <div className="bg-[#193549] dark:bg-[#193549] grid grid-cols-4 w-full rounded-md overflow-hidden">
+                          <div className="py-3 pl-4 flex items-center">
+                            <span className="text-white font-medium">{deck ? deck.name : deckId}</span>
+                          </div>
+                          <div className="py-3 flex items-center justify-center">
+                            <span className="text-green-400">{stats.wins}</span>
+                          </div>
+                          <div className="py-3 flex items-center justify-center">
+                            <span className="text-red-400">{stats.losses}</span>
+                          </div>
+                          <div className="py-3 flex items-center justify-center">
+                            <span className={`px-3 py-1 rounded-full font-medium ${
+                              winRate >= 60 
+                                ? 'bg-yellow-500 text-black' 
+                                : winRate >= 50 
+                                  ? 'bg-green-600 text-white' 
+                                  : winRate >= 30
+                                    ? 'bg-blue-600 text-white'
+                                    : 'bg-gray-600 text-white'
+                            }`}>
+                              {stats.winRate.toFixed(1)}%
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           </div>
           
           {/* 対戦相手デッキ別詳細 */}
-          <div className="card-bg-transparent shadow rounded-lg p-6">
-            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">対戦相手デッキ別成績</h3>
+          <div className="bg-[#193549] dark:bg-[#193549] rounded-lg shadow p-4">
+            <h3 className="text-xl font-semibold text-gray-200 dark:text-white mb-4">対戦相手デッキ別成績</h3>
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700 table-bg-transparent">
-                <thead className="bg-gray-50/90 dark:bg-gray-700/90">
-                  <tr>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                      デッキタイプ
-                    </th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                      勝利
-                    </th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                      敗北
-                    </th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                      勝率
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                  {statistics && Object.keys(statistics.opponentStats).map((deckName) => {
-                    const stats = statistics.opponentStats[deckName];
-                    return (
-                      <tr key={deckName} className="hover:bg-gray-50 dark:hover:bg-gray-700">
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-                          {deckName}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-green-600 dark:text-green-400">
-                          {stats.wins}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-red-600 dark:text-red-400">
-                          {stats.losses}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-600 dark:text-blue-400">
-                          {stats.winRate.toFixed(1)}%
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+              {/* テーブルヘッダー */}
+              <div className="bg-[#193549] dark:bg-[#193549] rounded-t-md overflow-hidden grid grid-cols-4 text-center py-3 mb-1">
+                <div className="text-gray-200 font-medium">デッキタイプ</div>
+                <div className="text-gray-200 font-medium">勝利</div>
+                <div className="text-gray-200 font-medium">敗北</div>
+                <div className="text-gray-200 font-medium">勝率</div>
+              </div>
+              
+              {/* テーブルボディ */}
+              <div className="space-y-1">
+                {statistics && Object.keys(statistics.opponentStats).map((deckName) => {
+                  const stats = statistics.opponentStats[deckName];
+                  const winRate = stats.winRate;
+                  return (
+                    <div key={deckName} className="relative">
+                      {/* 左側の勝率を示すバー - 勝率が高いほど色が濃くなる */}
+                      <div 
+                        className={`absolute left-0 top-0 bottom-0 w-1.5 ${
+                          winRate >= 60 
+                            ? 'bg-yellow-400' 
+                            : winRate >= 50 
+                              ? 'bg-green-400' 
+                              : winRate >= 30
+                                ? 'bg-blue-400'
+                                : 'bg-gray-400'
+                        }`}
+                      ></div>
+                      
+                      {/* テーブル行 */}
+                      <div className="ml-1.5">
+                        {/* テーブルセル */}
+                        <div className="bg-[#193549] dark:bg-[#193549] grid grid-cols-4 w-full rounded-md overflow-hidden">
+                          <div className="py-3 pl-4 flex items-center">
+                            <span className="text-white font-medium">{deckName}</span>
+                          </div>
+                          <div className="py-3 flex items-center justify-center">
+                            <span className="text-green-400">{stats.wins}</span>
+                          </div>
+                          <div className="py-3 flex items-center justify-center">
+                            <span className="text-red-400">{stats.losses}</span>
+                          </div>
+                          <div className="py-3 flex items-center justify-center">
+                            <span className={`px-3 py-1 rounded-full font-medium ${
+                              winRate >= 60 
+                                ? 'bg-yellow-500 text-black' 
+                                : winRate >= 50 
+                                  ? 'bg-green-600 text-white' 
+                                  : winRate >= 30
+                                    ? 'bg-blue-600 text-white'
+                                    : 'bg-gray-600 text-white'
+                            }`}>
+                              {stats.winRate.toFixed(1)}%
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           </div>
         </>
