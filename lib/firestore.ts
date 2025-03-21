@@ -54,10 +54,15 @@ export const getUserDecks = async (userId: string) => {
   const decksRef = collection(db, getUserDecksPath(userId));
   const decksSnapshot = await getDocs(decksRef);
   
-  return decksSnapshot.docs.map(doc => ({
-    id: doc.id,
-    ...doc.data()
-  } as Deck));
+  return decksSnapshot.docs.map(doc => {
+    const data = doc.data();
+    return {
+      id: doc.id,
+      ...data,
+      createdAt: data.createdAt ? (data.createdAt as Timestamp).toDate() : new Date(),
+      updatedAt: data.updatedAt ? (data.updatedAt as Timestamp).toDate() : new Date()
+    } as Deck;
+  });
 };
 
 // デュエル記録の追加
@@ -91,11 +96,14 @@ export const getUserDuelRecords = async (userId: string) => {
   const duelsQuery = query(duelsRef, orderBy('timestamp', 'desc'));
   const duelsSnapshot = await getDocs(duelsQuery);
   
-  return duelsSnapshot.docs.map(doc => ({
-    id: doc.id,
-    ...doc.data(),
-    timestamp: (doc.data().timestamp as Timestamp).toDate()
-  } as DuelRecord));
+  return duelsSnapshot.docs.map(doc => {
+    const data = doc.data();
+    return {
+      id: doc.id,
+      ...data,
+      timestamp: data.timestamp ? (data.timestamp as Timestamp).toDate() : new Date()
+    } as DuelRecord;
+  });
 };
 
 // 特定のデッキのデュエル記録を取得
@@ -108,9 +116,12 @@ export const getDeckDuelRecords = async (userId: string, deckId: string) => {
   );
   const duelsSnapshot = await getDocs(duelsQuery);
   
-  return duelsSnapshot.docs.map(doc => ({
-    id: doc.id,
-    ...doc.data(),
-    timestamp: (doc.data().timestamp as Timestamp).toDate()
-  } as DuelRecord));
+  return duelsSnapshot.docs.map(doc => {
+    const data = doc.data();
+    return {
+      id: doc.id,
+      ...data,
+      timestamp: data.timestamp ? (data.timestamp as Timestamp).toDate() : new Date()
+    } as DuelRecord;
+  });
 }; 

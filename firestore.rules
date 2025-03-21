@@ -5,22 +5,16 @@ service cloud.firestore {
     match /users/{userId} {
       // 自分のデータのみ読み書き可能
       allow read, write: if request.auth != null && request.auth.uid == userId;
-    }
-    
-    // デッキデータ
-    match /decks/{deckId} {
-      // 自分が作成したデッキのみ読み書き可能
-      allow read, write: if request.auth != null && request.auth.uid == resource.data.userId;
-      // 新規作成時
-      allow create: if request.auth != null && request.auth.uid == request.resource.data.userId;
-    }
-    
-    // 対戦記録
-    match /duels/{duelId} {
-      // 自分の対戦記録のみ読み書き可能
-      allow read, write: if request.auth != null && request.auth.uid == resource.data.userId;
-      // 新規作成時
-      allow create: if request.auth != null && request.auth.uid == request.resource.data.userId;
+      
+      // ネストされたデッキコレクション
+      match /decks/{deckId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+      
+      // ネストされた対戦記録コレクション
+      match /duels/{duelId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
     }
     
     // 開発/テスト用（必ず本番環境では削除すること）
