@@ -21,8 +21,8 @@ export default function Home() {
               <Image 
                 src="/stats-logo.png" 
                 alt="Master Duel Stats" 
-                width={500} 
-                height={150}
+                width={1200} 
+                height={420}
                 priority
                 className="w-auto h-auto"
               />
