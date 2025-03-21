@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
@@ -10,10 +10,15 @@ import { FirebaseError } from 'firebase/app';
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [isRedirecting, setIsRedirecting] = useState(false);
   const router = useRouter();
+
+  // モバイルデバイス検出
+  const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+    typeof window !== 'undefined' ? window.navigator.userAgent : ''
+  );
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,185 +53,96 @@ export default function Login() {
 
   const handleGoogleSignIn = async () => {
     try {
-      setLoading(true);
-      setError('');
+      setError(null);
       
-      // モバイルデバイスの検出
-      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-        navigator.userAgent
-      );
-      
-      if (isMobile) {
+      // モバイルデバイスではリダイレクト中であることを表示
+      if (isMobileDevice) {
         setIsRedirecting(true);
-        // モバイルの場合、認証完了後にリダイレクトされるので
-        // ここに保存しておく状態があれば保存する
       }
       
-      await signInWithGoogle();
+      const result = await signInWithGoogle();
       
-      // モバイルデバイスの場合、リダイレクトするためここには到達しません
-      // デスクトップの場合のみ実行される
-      if (!isMobile) {
+      if (result.success) {
         router.push('/duels');
+      } else if (result.error) {
+        setError(result.error);
+        setIsRedirecting(false);
       }
-    } catch (err) {
-      console.error('Googleログインエラー:', err);
-      setIsRedirecting(false);
+    } catch (error) {
+      console.error('ログインエラー:', error);
       
-      // エラーメッセージを取得
-      if (err instanceof Error) {
-        // エラーメッセージをユーザーフレンドリーに表示
-        let userMessage = err.message;
+      if (error instanceof FirebaseError) {
+        let errorMessage = 'ログイン中にエラーが発生しました。';
         
-        // Firebase特定のエラーコードの場合は詳細情報を追加
-        const firebaseError = err as FirebaseError;
-        if (firebaseError.code) {
-          console.error('エラーコード:', firebaseError.code);
-          if (firebaseError.code === 'auth/unauthorized-domain') {
-            userMessage = 'このドメインはGoogle認証で許可されていません。管理者に連絡してください。';
-          } else if (firebaseError.code === 'auth/invalid-credential') {
-            userMessage = 'Google認証の資格情報が無効です。別のGoogleアカウントで試すか、他のログイン方法をお試しください。';
-          } else if (firebaseError.code === 'auth/popup-closed-by-user') {
-            userMessage = '認証ウィンドウが閉じられました。もう一度お試しください。';
-          }
+        // エラーコードに基づいてユーザーフレンドリーなメッセージを設定
+        switch(error.code) {
+          case 'auth/unauthorized-domain':
+            errorMessage = 'このドメインはFirebaseで承認されていません。管理者に連絡してください。';
+            break;
+          case 'auth/invalid-credential':
+            errorMessage = '認証情報が無効です。もう一度お試しください。';
+            if (isMobileDevice) {
+              errorMessage += ' (モバイルでの認証に問題がある場合は、PCからお試しください)';
+            }
+            break;
+          case 'auth/popup-closed-by-user':
+            errorMessage = 'ログインがキャンセルされました。もう一度お試しください。';
+            break;
+          default:
+            errorMessage = `ログイン中にエラーが発生しました: ${error.code}`;
         }
         
-        // モバイルデバイスでのエラーの場合、追加情報を表示
-        const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-          navigator.userAgent
-        );
-        if (isMobileDevice) {
-          userMessage += ' モバイルブラウザでの認証で問題が発生しました。WiFi接続を確認するか、PCからログインしてみてください。';
-        }
-        
-        setError(userMessage);
+        setError(errorMessage);
       } else {
-        setError('Googleログイン中にエラーが発生しました。もう一度お試しください');
+        setError('不明なエラーが発生しました。もう一度お試しください。');
       }
-    } finally {
-      if (!isRedirecting) {
-        setLoading(false);
-      }
+      
+      setIsRedirecting(false);
     }
   };
 
   return (
-    <>
-      <div className="text-center">
-        <div className="flex justify-center mb-4">
-          <Image 
-            src="/stats-logo.png" 
-            alt="Master Duel Stats" 
-            width={200} 
-            height={60}
-            priority
-            className="w-auto h-auto"
-          />
+    <div className="flex min-h-screen flex-col items-center justify-center p-4 bg-gray-900">
+      <div className="w-full max-w-md p-8 space-y-8 bg-gray-800 rounded-xl shadow-2xl">
+        <div className="text-center">
+          <h1 className="text-4xl font-bold text-white">ログイン</h1>
+          <p className="mt-2 text-gray-300">マスターデュエル統計アプリへようこそ</p>
         </div>
-        <h2 className="mt-4 text-3xl font-extrabold text-gray-900">アカウントにログイン</h2>
-        <p className="mt-2 text-sm text-gray-600">
-          または{' '}
-          <Link href="/signup" className="font-medium text-purple-600 hover:text-purple-500">
-            新規登録する
-          </Link>
-        </p>
-      </div>
-      
-      <div className="mt-8">
+
+        {error && (
+          <div className="p-4 my-4 text-sm text-red-100 bg-red-500 rounded-lg" role="alert">
+            {error}
+          </div>
+        )}
+
         {isRedirecting ? (
-          <div className="text-center py-4">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500 mx-auto mb-4"></div>
-            <p className="text-gray-600">Googleアカウントでログイン中です。リダイレクトしています...</p>
-            <p className="text-sm text-gray-500 mt-2">ログインページが表示されたら、Googleアカウントを選択してください</p>
-            <button 
+          <div className="flex flex-col items-center justify-center space-y-4 p-4">
+            <div className="w-12 h-12 border-t-2 border-b-2 border-blue-500 rounded-full animate-spin"></div>
+            <p className="text-white">Googleアカウントにリダイレクトしています...</p>
+            <p className="text-gray-400 text-sm">ブラウザの認証画面に移動します。しばらくお待ちください。</p>
+            <button
               onClick={() => setIsRedirecting(false)}
-              className="mt-4 text-purple-600 underline text-sm"
+              className="px-4 py-2 mt-4 text-sm text-white bg-red-600 rounded hover:bg-red-700"
             >
               キャンセル
             </button>
           </div>
         ) : (
-          <button
-            onClick={handleGoogleSignIn}
-            disabled={loading}
-            className="group relative w-full flex justify-center py-2 px-4 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:bg-gray-200"
-          >
-            <svg className="h-5 w-5 mr-2" viewBox="0 0 24 24">
-              <g transform="matrix(1, 0, 0, 1, 27.009001, -39.238998)">
-                <path fill="#4285F4" d="M -3.264 51.509 C -3.264 50.719 -3.334 49.969 -3.454 49.239 L -14.754 49.239 L -14.754 53.749 L -8.284 53.749 C -8.574 55.229 -9.424 56.479 -10.684 57.329 L -10.684 60.329 L -6.824 60.329 C -4.564 58.239 -3.264 55.159 -3.264 51.509 Z"/>
-                <path fill="#34A853" d="M -14.754 63.239 C -11.514 63.239 -8.804 62.159 -6.824 60.329 L -10.684 57.329 C -11.764 58.049 -13.134 58.489 -14.754 58.489 C -17.884 58.489 -20.534 56.379 -21.484 53.529 L -25.464 53.529 L -25.464 56.619 C -23.494 60.539 -19.444 63.239 -14.754 63.239 Z"/>
-                <path fill="#FBBC05" d="M -21.484 53.529 C -21.734 52.809 -21.864 52.039 -21.864 51.239 C -21.864 50.439 -21.724 49.669 -21.484 48.949 L -21.484 45.859 L -25.464 45.859 C -26.284 47.479 -26.754 49.299 -26.754 51.239 C -26.754 53.179 -26.284 54.999 -25.464 56.619 L -21.484 53.529 Z"/>
-                <path fill="#EA4335" d="M -14.754 43.989 C -12.984 43.989 -11.404 44.599 -10.154 45.789 L -6.734 42.369 C -8.804 40.429 -11.514 39.239 -14.754 39.239 C -19.444 39.239 -23.494 41.939 -25.464 45.859 L -21.484 48.949 C -20.534 46.099 -17.884 43.989 -14.754 43.989 Z"/>
-              </g>
-            </svg>
-            Googleでログイン
-          </button>
-        )}
-      </div>
-      
-      <div className="mt-6 relative">
-        <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-gray-300"></div>
-        </div>
-        <div className="relative flex justify-center text-sm">
-          <span className="px-2 bg-white text-gray-500">またはメールアドレスでログイン</span>
-        </div>
-      </div>
-      
-      <form className="mt-6 space-y-6" onSubmit={handleSubmit}>
-        {error && (
-          <div className="rounded-md bg-red-50 p-4">
-            <div className="text-sm text-red-700">{error}</div>
+          <div className="mt-8 space-y-6">
+            <button
+              onClick={handleGoogleSignIn}
+              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            >
+              <span className="absolute left-0 inset-y-0 flex items-center pl-3">
+                <svg className="h-5 w-5 text-blue-400 group-hover:text-blue-300" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 0C4.477 0 0 4.477 0 10c0 4.42 2.865 8.167 6.839 9.49.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.605-3.369-1.343-3.369-1.343-.454-1.155-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.022A9.578 9.578 0 0110 4.836c.85.004 1.705.114 2.504.336 1.909-1.29 2.747-1.022 2.747-1.022.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.579.688.481C17.14 18.163 20 14.417 20 10c0-5.523-4.477-10-10-10z" clipRule="evenodd" />
+                </svg>
+              </span>
+              Googleでログイン
+            </button>
           </div>
         )}
-        
-        <div className="rounded-md shadow-sm -space-y-px">
-          <div>
-            <label htmlFor="email-address" className="sr-only">
-              メールアドレス
-            </label>
-            <input
-              id="email-address"
-              name="email"
-              type="email"
-              autoComplete="email"
-              required
-              className="appearance-none rounded-t-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-purple-500 focus:border-purple-500 focus:z-10 sm:text-sm"
-              placeholder="メールアドレス"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              disabled={loading}
-            />
-          </div>
-          <div>
-            <label htmlFor="password" className="sr-only">
-              パスワード
-            </label>
-            <input
-              id="password"
-              name="password"
-              type="password"
-              autoComplete="current-password"
-              required
-              className="appearance-none rounded-b-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-purple-500 focus:border-purple-500 focus:z-10 sm:text-sm"
-              placeholder="パスワード"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              disabled={loading}
-            />
-          </div>
-        </div>
-
-        <div>
-          <button
-            type="submit"
-            disabled={loading}
-            className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:bg-purple-400"
-          >
-            {loading ? 'ログイン中...' : 'ログイン'}
-          </button>
-        </div>
-      </form>
-    </>
+      </div>
+    </div>
   );
 } 
