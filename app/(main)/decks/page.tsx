@@ -61,7 +61,7 @@ export default function Decks() {
   }
 
   return (
-    <div className="bg-white dark:bg-gray-800 shadow-sm rounded-lg p-6">
+    <div className="dark:bg-gray-800 shadow-sm rounded-lg p-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">デッキ管理</h1>
         <Link 

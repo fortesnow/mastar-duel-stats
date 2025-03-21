@@ -311,8 +311,10 @@ export default function Stats() {
   }
 
   return (
-    <div className="bg-white dark:bg-gray-800 shadow-sm rounded-lg p-6">
-      <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">統計データ</h1>
+    <div className="dark:bg-gray-800 shadow-sm rounded-lg p-6">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">デュエル統計</h1>
+      </div>
       
       {error && (
         <div className="bg-red-50 dark:bg-red-900 p-4 rounded-md mb-4">
