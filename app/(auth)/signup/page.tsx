@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { signUp, signInWithGoogle } from '../../../lib/auth';
 import { FirebaseError } from 'firebase/app';
@@ -82,11 +83,21 @@ export default function SignUp() {
   return (
     <>
       <div className="text-center">
-        <h2 className="mt-6 text-3xl font-extrabold text-gray-900">アカウント登録</h2>
+        <div className="flex justify-center mb-4">
+          <Image 
+            src="/stats-logo.png" 
+            alt="Master Duel Stats" 
+            width={200} 
+            height={60}
+            priority
+            className="w-auto h-auto"
+          />
+        </div>
+        <h2 className="mt-4 text-3xl font-extrabold text-gray-900">新規アカウント登録</h2>
         <p className="mt-2 text-sm text-gray-600">
-          既にアカウントをお持ちですか？{' '}
+          または{' '}
           <Link href="/login" className="font-medium text-purple-600 hover:text-purple-500">
-            ログイン
+            既存のアカウントでログイン
           </Link>
         </p>
       </div>

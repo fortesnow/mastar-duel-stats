@@ -2,6 +2,7 @@
 
 import { Fragment } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { Disclosure, Menu, Transition } from '@headlessui/react';
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
@@ -48,7 +49,15 @@ export default function Navigation() {
               
               <div className="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start">
                 <div className="flex flex-shrink-0 items-center">
-                  <span className="text-white font-bold text-xl">マスターデュエル統計</span>
+                  <Link href="/">
+                    <Image
+                      src="/stats-logo.png"
+                      alt="Master Duel Stats"
+                      width={180}
+                      height={40}
+                      className="h-8 w-auto"
+                    />
+                  </Link>
                 </div>
                 <div className="hidden sm:ml-6 sm:block">
                   <div className="flex space-x-4">

@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 
 export default function Home() {
   return (
@@ -16,9 +17,16 @@ export default function Home() {
         
         <div className="mx-auto max-w-4xl py-24 sm:py-32">
           <div className="text-center">
-            <h1 className="text-4xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-6xl">
-              遊戯王マスターデュエル<br />統計アプリ
-            </h1>
+            <div className="flex justify-center mb-8">
+              <Image 
+                src="/stats-logo.png" 
+                alt="Master Duel Stats" 
+                width={500} 
+                height={150}
+                priority
+                className="w-auto h-auto"
+              />
+            </div>
             <p className="mt-6 text-lg leading-8 text-gray-600 dark:text-gray-300">
               デュエリストカップの対戦データを記録・分析し、パフォーマンス向上を支援します。
               勝率の分析や対戦履歴の管理を簡単に行えます。
