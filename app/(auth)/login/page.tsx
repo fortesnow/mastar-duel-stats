@@ -151,18 +151,19 @@ export default function Login() {
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center p-4 bg-gray-900">
-      <div className="w-full max-w-md p-8 space-y-8 bg-gray-800 rounded-xl shadow-2xl">
+      <div className={`w-full ${isMobileDevice ? 'max-w-[95%]' : 'max-w-md'} p-5 sm:p-8 space-y-6 bg-gray-800 rounded-xl shadow-2xl`}>
         <div className="text-center">
-          <h1 className="text-4xl font-bold text-white">ログイン</h1>
-          <p className="mt-2 text-gray-300">マスターデュエル統計アプリへようこそ</p>
+          <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">ログイン</h1>
+          <p className="mt-1 text-sm sm:text-base text-gray-300">マスターデュエル統計アプリへようこそ</p>
         </div>
 
         {error && (
-          <div className="p-4 my-4 text-sm text-red-100 bg-red-500 rounded-lg" role="alert">
-            {error}
+          <div className="p-3 sm:p-4 my-3 text-sm text-red-100 bg-red-500 rounded-lg flex items-center justify-between" role="alert">
+            <span className="flex-1 mr-2">{error}</span>
             <button 
-              className="ml-2 font-bold underline"
+              className="shrink-0 w-6 h-6 flex items-center justify-center rounded-full bg-red-600 hover:bg-red-700"
               onClick={() => setError(null)}
+              aria-label="閉じる"
             >
               ✕
             </button>
@@ -170,43 +171,69 @@ export default function Login() {
         )}
         
         {showCookieInfo && (
-          <div className="p-4 my-4 text-sm text-yellow-100 bg-yellow-600 rounded-lg">
-            <p className="font-bold mb-1">サードパーティCookieが必要です</p>
-            <p className="mb-2">Googleログインにはサードパーティのクッキーが必要です。</p>
+          <div className="p-3 sm:p-4 my-3 text-sm text-yellow-100 bg-yellow-600 rounded-lg">
+            <div className="flex items-center mb-1">
+              <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd"></path>
+              </svg>
+              <p className="font-bold">サードパーティCookieが必要です</p>
+            </div>
+            <p className="mb-2 ml-7">Googleログインにはサードパーティのクッキーが必要です。</p>
             {isChrome && (
-              <p>Chrome設定→プライバシーとセキュリティ→サードパーティCookieでサイトを許可してください。</p>
+              <div className="ml-7 p-2 bg-yellow-700 rounded text-xs">
+                <p className="font-semibold mb-1">Chrome設定手順:</p>
+                <ol className="list-decimal list-inside">
+                  <li>設定を開く</li>
+                  <li>プライバシーとセキュリティを選択</li>
+                  <li>Cookieと他のサイトデータを選択</li>
+                  <li>サードパーティCookieをブロックしないに設定</li>
+                </ol>
+              </div>
             )}
           </div>
         )}
 
         {isRedirecting ? (
-          <div className="flex flex-col items-center justify-center space-y-4 p-4">
-            <div className="w-12 h-12 border-t-2 border-b-2 border-blue-500 rounded-full animate-spin"></div>
-            <p className="text-white">Googleアカウントにリダイレクトしています...</p>
-            <p className="text-gray-400 text-sm">ブラウザの認証画面に移動します。しばらくお待ちください。</p>
+          <div className="flex flex-col items-center justify-center space-y-3 sm:space-y-4 p-3 sm:p-4">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 border-t-2 border-b-2 border-blue-500 rounded-full animate-spin"></div>
+            <p className="text-base sm:text-lg text-white text-center">Googleアカウントにリダイレクトしています...</p>
+            <p className="text-xs sm:text-sm text-gray-400 text-center">ブラウザの認証画面に移動します。しばらくお待ちください。</p>
             <button
               onClick={handleCancelRedirect}
-              className="px-4 py-2 mt-4 text-sm text-white bg-red-600 rounded hover:bg-red-700"
+              className="px-4 py-2 mt-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 active:bg-red-800 active:scale-95 transition-all"
             >
               キャンセル
             </button>
           </div>
         ) : (
-          <div className="mt-8 space-y-6">
+          <div className="mt-6 sm:mt-8 space-y-4">
             <button
               onClick={handleGoogleSignIn}
-              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              className="group relative w-full flex justify-center py-3.5 px-4 border border-transparent text-base font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 active:bg-blue-800 active:scale-[0.98] transition-all shadow-lg"
             >
               <span className="absolute left-0 inset-y-0 flex items-center pl-3">
                 <svg className="h-5 w-5 text-blue-400 group-hover:text-blue-300" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M12.545,10.239v3.821h5.445c-0.712,2.315-2.647,3.972-5.445,3.972c-3.332,0-6.033-2.701-6.033-6.032 s2.701-6.032,6.033-6.032c1.498,0,2.866,0.549,3.921,1.453l2.814-2.814C17.503,2.988,15.139,2,12.545,2 C7.021,2,2.543,6.477,2.543,12s4.478,10,10.002,10c8.396,0,10.249-7.85,9.426-11.748L12.545,10.239z" />
                 </svg>
               </span>
-              Googleでログイン
+              <span className="ml-4">Googleでログイン</span>
             </button>
+            
+            {isMobileDevice && (
+              <p className="text-xs text-center text-gray-400 mt-3">
+                モバイルデバイスでは認証後に自動的にアプリに戻ります
+              </p>
+            )}
           </div>
         )}
       </div>
+      
+      {/* モバイルデバイス向けのフッター */}
+      {isMobileDevice && (
+        <div className="fixed bottom-0 left-0 right-0 bg-gray-800 border-t border-gray-700 p-2 text-center text-xs text-gray-400">
+          マスターデュエル統計アプリ © 2023
+        </div>
+      )}
     </div>
   );
 } 
