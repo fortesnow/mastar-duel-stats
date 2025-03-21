@@ -80,72 +80,79 @@ export default function Duels() {
           </Link>
         </div>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700 table-bg-transparent">
-            <thead className="bg-gray-50/90 dark:bg-gray-700/90">
-              <tr>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                  日時
-                </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                  結果
-                </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                  先攻/後攻
-                </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                  使用デッキ
-                </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                  対戦相手デッキ
-                </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                  アクション
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-              {duelRecords.map((duel) => (
-                <tr key={duel.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-                    {format(duel.timestamp, 'yyyy/MM/dd HH:mm', { locale: ja })}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">
-                    <span className={`px-2 py-1 rounded-full ${
+        <div>
+          {/* テーブルヘッダー */}
+          <div className="bg-[#193549] dark:bg-[#193549] rounded-t-md overflow-hidden grid grid-cols-3 text-center py-3 mb-1">
+            <div className="text-gray-200 font-medium">先攻/後攻</div>
+            <div className="text-gray-200 font-medium">使用デッキ</div>
+            <div className="text-gray-200 font-medium">対戦相手デッキ</div>
+          </div>
+          
+          {/* テーブルボディ */}
+          <div className="space-y-1">
+            {duelRecords.map((duel) => (
+              <div key={duel.id} className="relative">
+                {/* 左側の勝敗を示すバー */}
+                <div 
+                  className={`absolute left-0 top-0 bottom-0 w-1.5 ${
+                    duel.result === 'win' 
+                      ? 'bg-yellow-400' 
+                      : 'bg-gray-400'
+                  }`}
+                ></div>
+                
+                {/* テーブル行 */}
+                <div className="flex ml-1.5">
+                  {/* 勝敗表示（絶対配置） */}
+                  <div className="absolute left-4 top-1/2 transform -translate-y-1/2">
+                    <div className={`font-bold text-lg ${
                       duel.result === 'win' 
-                        ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' 
-                        : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+                        ? 'text-yellow-400' 
+                        : 'text-gray-400'
                     }`}>
-                      {duel.result === 'win' ? '勝利' : '敗北'}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-                    {duel.isFirstPlayer ? '先攻' : '後攻'}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-                    {decks.find(deck => deck.id === duel.ownDeckId)?.name || duel.ownDeckId}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-                    {duel.opponentDeckName}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <Link 
-                      href={`/duels/${duel.id}`}
-                      className="text-purple-600 hover:text-purple-900 dark:text-purple-400 dark:hover:text-purple-300 mr-4"
-                    >
-                      詳細
+                      {duel.result === 'win' ? 'WIN' : 'LOSE'}
+                    </div>
+                    <div className="text-gray-200 text-xs">
+                      {format(duel.timestamp, 'yyyy/MM/dd HH:mm', { locale: ja })}
+                    </div>
+                  </div>
+                  
+                  {/* テーブルセル */}
+                  <div className="bg-[#193549] dark:bg-[#193549] grid grid-cols-3 w-full rounded-md overflow-hidden">
+                    <div className="pl-16 py-4 flex items-center justify-center">
+                      <span className={`px-3 py-1 rounded-full font-medium ${
+                        duel.isFirstPlayer 
+                          ? 'bg-blue-600 text-white' 
+                          : 'bg-green-600 text-white'
+                      }`}>
+                        {duel.isFirstPlayer ? '先攻' : '後攻'}
+                      </span>
+                    </div>
+                    <div className="py-4 flex items-center justify-center">
+                      <span className="text-white">{decks.find(deck => deck.id === duel.ownDeckId)?.name || duel.ownDeckId}</span>
+                    </div>
+                    <div className="py-4 flex items-center justify-center text-white">
+                      {duel.opponentDeckName}
+                    </div>
+                  </div>
+                  
+                  {/* アクションボタン（絶対配置） */}
+                  <div className="absolute right-4 top-1/2 transform -translate-y-1/2 flex space-x-2">
+                    <Link href={`/duels/${duel.id}/edit`} className="text-blue-400 hover:text-blue-300">
+                      <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                      </svg>
                     </Link>
-                    <Link 
-                      href={`/duels/${duel.id}/edit`}
-                      className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
-                    >
-                      編集
+                    <Link href={`/duels/${duel.id}`} className="text-gray-200">
+                      <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
                     </Link>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       )}
     </div>
