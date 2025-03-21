@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useEffect, useState, ReactNode, useCallback } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth, handleRedirectResult } from '../lib/auth';
 import { useRouter, usePathname } from 'next/navigation';
@@ -12,13 +12,15 @@ interface AuthContextType {
   firebaseUser: FirebaseUser | null;
   loading: boolean;
   authError: string | null;
+  clearAuthError: () => void;
 }
 
 const AuthContext = createContext<AuthContextType>({
   user: null,
   firebaseUser: null,
   loading: true,
-  authError: null
+  authError: null,
+  clearAuthError: () => {}
 });
 
 export function useAuth() {
@@ -33,15 +35,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const [redirectProcessed, setRedirectProcessed] = useState(false);
+  const [redirectCheckAttempts, setRedirectCheckAttempts] = useState(0);
+
+  // エラーをクリアする関数
+  const clearAuthError = useCallback(() => {
+    setAuthError(null);
+  }, []);
 
   // リダイレクト結果を処理する関数
   const processRedirectResult = async () => {
     // すでに処理済みの場合はスキップ
-    if (redirectProcessed) return;
+    if (redirectProcessed && redirectCheckAttempts > 1) return;
     
-    console.log('リダイレクト結果の処理を開始');
+    console.log(`リダイレクト結果の処理を開始 (試行: ${redirectCheckAttempts + 1})`);
     try {
       setRedirectProcessed(true); // 処理済みフラグを立てる
+      setRedirectCheckAttempts(prev => prev + 1);
+      
       const result = await handleRedirectResult();
       console.log('リダイレクト結果処理完了:', result);
 
@@ -63,11 +73,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       console.error('リダイレクト結果処理エラー:', error);
       setAuthError('認証処理中にエラーが発生しました。もう一度お試しください。');
+      
+      // 3回までリトライ
+      if (redirectCheckAttempts < 3) {
+        console.log(`リダイレクト処理を再試行します (${redirectCheckAttempts + 1}/3)`);
+        setTimeout(() => {
+          setRedirectProcessed(false);
+        }, 1000);
+      }
     }
   };
 
   useEffect(() => {
     console.log('AuthProvider マウント - 現在のパス:', pathname);
+    
+    // モバイルデバイスチェック
+    const isMobileDevice = typeof window !== 'undefined' && /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+      window.navigator.userAgent
+    );
+    console.log(`デバイスタイプ: ${isMobileDevice ? 'モバイル' : 'デスクトップ'}`);
     
     let authUnsubscribe: () => void;
     
@@ -110,6 +134,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // 初期化処理
     const initialize = async () => {
       try {
+        // リダイレクト中の場合はさらに詳細にログ出力
+        if (typeof window !== 'undefined') {
+          const sessionRedirect = sessionStorage.getItem('auth_redirect_in_progress');
+          const localRedirect = localStorage.getItem('auth_redirect_in_progress');
+          console.log('リダイレクト状態確認:', {
+            'sessionStorage': sessionRedirect,
+            'localStorage': localRedirect
+          });
+        }
+        
         // 1. まずリダイレクト結果を処理
         await processRedirectResult();
         
@@ -130,10 +164,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         authUnsubscribe();
       }
     };
-  }, [router, pathname]);
+  }, [router, pathname, redirectProcessed, redirectCheckAttempts]);
 
   return (
-    <AuthContext.Provider value={{ user, firebaseUser, loading, authError }}>
+    <AuthContext.Provider value={{ user, firebaseUser, loading, authError, clearAuthError }}>
       {children}
     </AuthContext.Provider>
   );

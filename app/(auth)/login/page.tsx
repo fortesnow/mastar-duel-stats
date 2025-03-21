@@ -9,29 +9,57 @@ import { useAuth } from '../../../components/AuthProvider';
 export default function Login() {
   const [error, setError] = useState<string | null>(null);
   const [isRedirecting, setIsRedirecting] = useState(false);
+  const [showCookieInfo, setShowCookieInfo] = useState(false);
   const router = useRouter();
-  const { authError } = useAuth();
+  const { authError, firebaseUser, clearAuthError } = useAuth();
+
+  // マウント時にエラーをクリア
+  useEffect(() => {
+    clearAuthError();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // AuthProviderからのエラーを表示
   useEffect(() => {
     if (authError) {
       setError(authError);
       setIsRedirecting(false);
+      
+      // サードパーティCookie関連のエラーかチェック
+      if (authError.includes('サードパーティCookie') || 
+          authError.includes('Cookie')) {
+        setShowCookieInfo(true);
+      }
     }
   }, [authError]);
+  
+  // 既にログイン済みの場合はリダイレクト
+  useEffect(() => {
+    if (firebaseUser) {
+      console.log('既にログイン済み - duelsにリダイレクト');
+      router.push('/duels');
+    }
+  }, [firebaseUser, router]);
 
   // モバイルデバイス検出
   const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
     typeof window !== 'undefined' ? window.navigator.userAgent : ''
   );
+  
+  // Chromeブラウザ検出
+  const isChrome = typeof window !== 'undefined' && 
+    /Chrome/.test(navigator.userAgent) && 
+    /Google Inc/.test(navigator.vendor);
 
   // リダイレクト中かどうかのチェック
   useEffect(() => {
-    // セッションストレージを確認
-    const redirectInProgress = typeof window !== 'undefined' ? 
-      sessionStorage.getItem('auth_redirect_in_progress') : null;
+    if (typeof window === 'undefined') return;
     
-    if (redirectInProgress === 'true') {
+    // セッションストレージとローカルストレージを確認
+    const redirectInProgressSession = sessionStorage.getItem('auth_redirect_in_progress');
+    const redirectInProgressLocal = localStorage.getItem('auth_redirect_in_progress');
+    
+    if (redirectInProgressSession === 'true' || redirectInProgressLocal === 'true') {
       setIsRedirecting(true);
     }
   }, []);
@@ -39,6 +67,7 @@ export default function Login() {
   const handleGoogleSignIn = async () => {
     try {
       setError(null);
+      setShowCookieInfo(false);
       console.log('Googleログイン開始');
       
       // モバイルデバイスではリダイレクト中であることを表示
@@ -63,6 +92,12 @@ export default function Login() {
         console.error('認証エラー:', result.error);
         setError(result.error);
         setIsRedirecting(false);
+        
+        // サードパーティCookie関連のエラーかチェック
+        if (result.error.includes('サードパーティCookie') || 
+            result.error.includes('Cookie')) {
+          setShowCookieInfo(true);
+        }
       }
     } catch (error) {
       console.error('ログインエラー:', error);
@@ -84,6 +119,11 @@ export default function Login() {
           case 'auth/popup-closed-by-user':
             errorMessage = 'ログインがキャンセルされました。もう一度お試しください。';
             break;
+          case 'auth/third-party-cookies-blocked':
+          case 'auth/cookies-blocked':
+            errorMessage = 'ブラウザでサードパーティCookieがブロックされています。ブラウザの設定を確認して、もう一度お試しください。';
+            setShowCookieInfo(true);
+            break;
           default:
             errorMessage = `ログイン中にエラーが発生しました: ${error.code}`;
         }
@@ -100,9 +140,12 @@ export default function Login() {
   const handleCancelRedirect = () => {
     // リダイレクト状態をクリア
     setIsRedirecting(false);
+    setError(null);
     if (typeof window !== 'undefined') {
       sessionStorage.removeItem('auth_redirect_in_progress');
       sessionStorage.removeItem('auth_redirect_from');
+      localStorage.removeItem('auth_redirect_in_progress');
+      localStorage.removeItem('auth_redirect_from');
     }
   };
 
@@ -117,6 +160,22 @@ export default function Login() {
         {error && (
           <div className="p-4 my-4 text-sm text-red-100 bg-red-500 rounded-lg" role="alert">
             {error}
+            <button 
+              className="ml-2 font-bold underline"
+              onClick={() => setError(null)}
+            >
+              ✕
+            </button>
+          </div>
+        )}
+        
+        {showCookieInfo && (
+          <div className="p-4 my-4 text-sm text-yellow-100 bg-yellow-600 rounded-lg">
+            <p className="font-bold mb-1">サードパーティCookieが必要です</p>
+            <p className="mb-2">Googleログインにはサードパーティのクッキーが必要です。</p>
+            {isChrome && (
+              <p>Chrome設定→プライバシーとセキュリティ→サードパーティCookieでサイトを許可してください。</p>
+            )}
           </div>
         )}
 
