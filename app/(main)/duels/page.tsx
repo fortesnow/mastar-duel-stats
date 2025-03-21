@@ -2,15 +2,16 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { getUserDuelRecords } from '../../../lib/firestore';
+import { getUserDuelRecords, getUserDecks } from '../../../lib/firestore';
 import { useAuth } from '../../../components/AuthProvider';
-import { DuelRecord } from '../../../types';
+import { DuelRecord, Deck } from '../../../types';
 import { format } from 'date-fns';
 import { ja } from 'date-fns/locale';
 
 export default function Duels() {
   const { user, loading: authLoading } = useAuth();
   const [duelRecords, setDuelRecords] = useState<DuelRecord[]>([]);
+  const [decks, setDecks] = useState<Deck[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -21,8 +22,12 @@ export default function Duels() {
       
       try {
         setIsLoading(true);
-        const records = await getUserDuelRecords(user.id);
+        const [records, userDecks] = await Promise.all([
+          getUserDuelRecords(user.id),
+          getUserDecks(user.id)
+        ]);
         setDuelRecords(records);
+        setDecks(userDecks);
       } catch (err) {
         console.error('対戦記録取得エラー:', err);
         setError('対戦記録の取得中にエラーが発生しました');
@@ -118,7 +123,7 @@ export default function Duels() {
                     {duel.isFirstPlayer ? '先攻' : '後攻'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-                    {duel.ownDeckId}
+                    {decks.find(deck => deck.id === duel.ownDeckId)?.name || duel.ownDeckId}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
                     {duel.opponentDeckName}
