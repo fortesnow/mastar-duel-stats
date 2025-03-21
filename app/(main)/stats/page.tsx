@@ -15,6 +15,7 @@ import {
   Title,
   ChartOptions,
   TooltipItem,
+  ChartTypeRegistry
 } from 'chart.js';
 import { Pie, Bar } from 'react-chartjs-2';
 
@@ -212,8 +213,46 @@ export default function Stats() {
     ],
   };
 
-  // グラフ共通のオプション設定
-  const chartOptions: ChartOptions<'bar' | 'pie'> = {
+  // 共通のツールチップコールバック
+  const labelCallback = (tooltipItem: TooltipItem<keyof ChartTypeRegistry>) => {
+    const value = tooltipItem.raw as number;
+    if (tooltipItem.dataset.label === '勝率 (%)') {
+      return `${tooltipItem.label}: ${value.toFixed(1)}%`;
+    }
+    return `${tooltipItem.label}: ${value}`;
+  };
+
+  // 円グラフのオプション - Pie用に型定義
+  const pieOptions: ChartOptions<'pie'> = {
+    responsive: true,
+    maintainAspectRatio: false,
+    cutout: '30%',
+    plugins: {
+      legend: {
+        position: 'top',
+        labels: {
+          color: 'rgba(156, 163, 175, 1)',
+          font: {
+            size: 12
+          }
+        }
+      },
+      tooltip: {
+        backgroundColor: 'rgba(17, 24, 39, 0.8)',
+        titleColor: '#fff',
+        bodyColor: '#fff',
+        padding: 12,
+        boxPadding: 6,
+        usePointStyle: true,
+        callbacks: {
+          label: labelCallback
+        }
+      }
+    }
+  };
+
+  // 棒グラフのオプション - Bar用に型定義
+  const barOptions: ChartOptions<'bar'> = {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
@@ -234,52 +273,35 @@ export default function Stats() {
         boxPadding: 6,
         usePointStyle: true,
         callbacks: {
-          label: function(tooltipItem: TooltipItem<'bar' | 'pie'>) {
-            const value = tooltipItem.raw as number;
-            if (tooltipItem.dataset.label === '勝率 (%)') {
-              return `${tooltipItem.label}: ${value.toFixed(1)}%`;
-            }
-            return `${tooltipItem.label}: ${value}`;
-          }
+          label: labelCallback
         }
       }
     },
-  };
-
-  // 棒グラフのオプション
-  const barOptions = {
-    ...chartOptions,
     scales: {
       y: {
         min: 0,
         max: 100,
         ticks: {
           color: 'rgba(156, 163, 175, 1)',
-          callback: function(value: number) {
+          callback: function(value) {
             return value + '%';
           }
         },
         grid: {
-          color: 'rgba(107, 114, 128, 0.1)',
+          color: 'rgba(107, 114, 128, 0.1)'
         }
       },
       x: {
         ticks: {
-          color: 'rgba(156, 163, 175, 1)',
+          color: 'rgba(156, 163, 175, 1)'
         },
         grid: {
           display: false
         }
       }
-    },
+    }
   };
 
-  // 円グラフのオプション
-  const pieOptions = {
-    ...chartOptions,
-    cutout: '30%',
-  };
-  
   if (authLoading) {
     return (
       <div className="flex justify-center items-center h-64">

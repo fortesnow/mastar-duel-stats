@@ -1,7 +1,7 @@
 // Firebase設定
 import { initializeApp } from 'firebase/app';
-import { getFirestore } from 'firebase/firestore';
-import { getAuth, connectAuthEmulator } from 'firebase/auth';
+import { getFirestore, Firestore } from 'firebase/firestore';
+import { getAuth, connectAuthEmulator, Auth } from 'firebase/auth';
 
 // Firebaseの設定値
 // 実際の値は環境変数から取得するか、プロジェクト設定から取得します
@@ -25,8 +25,8 @@ if (!process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN) {
 
 // Firebaseの初期化
 let app;
-let db;
-let auth;
+let db: Firestore;
+let auth: Auth;
 
 try {
   app = initializeApp(firebaseConfig);
