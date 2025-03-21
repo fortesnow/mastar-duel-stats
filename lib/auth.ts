@@ -1,7 +1,6 @@
 import { 
   createUserWithEmailAndPassword, 
   signInWithEmailAndPassword, 
-  signOut as firebaseSignOut,
   updateProfile,
   User as FirebaseUser,
   GoogleAuthProvider,
@@ -12,8 +11,8 @@ import {
   onAuthStateChanged,
   signOut
 } from 'firebase/auth';
-import { doc, setDoc, serverTimestamp, getDoc } from 'firebase/firestore';
-import { app } from './firebase';
+import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { app, db } from './firebase';
 import { User } from '../types';
 import { FirebaseError } from 'firebase/app';
 
@@ -196,8 +195,11 @@ export const signOutUser = async () => {
   }
 };
 
+// エイリアスとしてsignOutもエクスポート
+export { signOutUser as signOut };
+
 // 現在のユーザーを取得
-export const getCurrentUser = (): Promise<User | null> => {
+export const getCurrentUser = (): Promise<FirebaseUser | null> => {
   return new Promise((resolve) => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       unsubscribe();

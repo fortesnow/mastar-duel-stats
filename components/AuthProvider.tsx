@@ -3,15 +3,19 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth, handleRedirectResult } from '../lib/auth';
-import { useRouter } from 'next/router';
+import { useRouter, usePathname } from 'next/navigation';
+import { User as FirebaseUser } from 'firebase/auth';
+import { User } from '../types';
 
 interface AuthContextType {
-  user: any | null;
+  user: User | null;
+  firebaseUser: FirebaseUser | null;
   loading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType>({
   user: null,
+  firebaseUser: null,
   loading: true
 });
 
@@ -20,9 +24,11 @@ export function useAuth() {
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<any | null>(null);
+  const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
     // リダイレクト結果の処理
@@ -32,8 +38,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       // ユーザーが認証されていて、ログインページまたはサインアップページにいる場合、duelsページにリダイレクト
       if (result.success && result.user && (
-        router.pathname === '/login' || 
-        router.pathname === '/signup'
+        pathname === '/login' || 
+        pathname === '/signup'
       )) {
         router.push('/duels');
       }
@@ -43,16 +49,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     // ユーザー認証状態の監視
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
+      setFirebaseUser(currentUser);
+      
+      // Firebaseユーザーをアプリケーションのユーザー型に変換
+      if (currentUser) {
+        // 完全なUser型オブジェクトを作成
+        const appUser: User = {
+          id: currentUser.uid,
+          email: currentUser.email || '',
+          displayName: currentUser.displayName || '',
+          createdAt: new Date(),
+          settings: {
+            theme: 'dark',
+            defaultDeck: ''
+          }
+        };
+        setUser(appUser);
+      } else {
+        setUser(null);
+      }
+      
       setLoading(false);
     });
 
     return () => unsubscribe();
-  }, [router]);
+  }, [router, pathname]);
 
   return (
-    <AuthContext.Provider value={{ user, loading }}>
+    <AuthContext.Provider value={{ user, firebaseUser, loading }}>
       {children}
     </AuthContext.Provider>
   );
-} 
+}
+
+export default AuthProvider; 

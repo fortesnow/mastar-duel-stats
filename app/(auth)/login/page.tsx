@@ -1,17 +1,12 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import Link from 'next/link';
-import Image from 'next/image';
+import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { signIn, signInWithGoogle } from '../../../lib/auth';
+import { signInWithGoogle } from '../../../lib/auth';
 import { FirebaseError } from 'firebase/app';
 
 export default function Login() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
   const [isRedirecting, setIsRedirecting] = useState(false);
   const router = useRouter();
 
@@ -19,37 +14,6 @@ export default function Login() {
   const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
     typeof window !== 'undefined' ? window.navigator.userAgent : ''
   );
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!email || !password) {
-      setError('メールアドレスとパスワードを入力してください');
-      return;
-    }
-    
-    try {
-      setLoading(true);
-      setError('');
-      
-      await signIn(email, password);
-      router.push('/duels');
-    } catch (err) {
-      console.error('ログインエラー:', err);
-      
-      if (err instanceof FirebaseError) {
-        if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password') {
-          setError('メールアドレスまたはパスワードが正しくありません');
-        } else {
-          setError('ログイン中にエラーが発生しました。もう一度お試しください');
-        }
-      } else {
-        setError('予期せぬエラーが発生しました。もう一度お試しください');
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleGoogleSignIn = async () => {
     try {
@@ -135,7 +99,7 @@ export default function Login() {
             >
               <span className="absolute left-0 inset-y-0 flex items-center pl-3">
                 <svg className="h-5 w-5 text-blue-400 group-hover:text-blue-300" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 0C4.477 0 0 4.477 0 10c0 4.42 2.865 8.167 6.839 9.49.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.605-3.369-1.343-3.369-1.343-.454-1.155-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.022A9.578 9.578 0 0110 4.836c.85.004 1.705.114 2.504.336 1.909-1.29 2.747-1.022 2.747-1.022.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.579.688.481C17.14 18.163 20 14.417 20 10c0-5.523-4.477-10-10-10z" clipRule="evenodd" />
+                  <path fillRule="evenodd" d="M10 0C4.477 0 0 10c0 4.42 2.865 8.167 6.839 9.49.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.605-3.369-1.343-3.369-1.343-.454-1.155-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.022A9.578 9.578 0 0110 4.836c.85.004 1.705.114 2.504.336 1.909-1.29 2.747-1.022 2.747-1.022.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.579.688.481C17.14 18.163 20 14.417 20 10c0-5.523-4.477-10-10-10z" clipRule="evenodd" />
                 </svg>
               </span>
               Googleでログイン

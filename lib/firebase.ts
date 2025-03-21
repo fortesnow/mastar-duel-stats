@@ -1,5 +1,5 @@
 // Firebase設定
-import { initializeApp } from 'firebase/app';
+import { initializeApp, FirebaseApp } from 'firebase/app';
 import { getFirestore, Firestore } from 'firebase/firestore';
 import { getAuth, connectAuthEmulator, Auth, setPersistence, browserLocalPersistence } from 'firebase/auth';
 
@@ -24,7 +24,7 @@ if (!process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN) {
 }
 
 // Firebaseの初期化
-let app;
+let app: FirebaseApp;
 let db: Firestore;
 let auth: Auth;
 
