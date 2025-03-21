@@ -61,7 +61,7 @@ export default function Decks() {
   }
 
   return (
-    <div className="dark:bg-gray-800 shadow-sm rounded-lg p-6">
+    <div className="bg-white/70 dark:bg-gray-800/70 shadow-sm rounded-lg p-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">デッキ管理</h1>
         <Link 
@@ -84,7 +84,7 @@ export default function Decks() {
         </div>
       ) : decks.length === 0 ? (
         <div className="text-center py-12">
-          <p className="text-gray-500 dark:text-gray-400 mb-4">デッキが登録されていません</p>
+          <p className="text-gray-500 dark:text-gray-400 mb-4">登録されたデッキがありません</p>
           <Link 
             href="/decks/new" 
             className="text-purple-600 hover:text-purple-500 font-medium"
@@ -93,15 +93,17 @@ export default function Decks() {
           </Link>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
           {decks.map((deck) => (
             <div 
               key={deck.id}
-              className="border dark:border-gray-700 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow"
+              className="card-bg-transparent rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden"
             >
-              <div className="p-4 bg-white dark:bg-gray-800">
-                <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-1">{deck.name}</h3>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">{deck.archetype}</p>
+              <div className="p-4">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">{deck.name}</h3>
+                <div className="flex items-center mb-2">
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">{deck.archetype}</p>
+                </div>
                 
                 <div className="flex flex-wrap gap-1 mb-4">
                   {deck.tags.map((tag, index) => (

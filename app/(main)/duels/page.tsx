@@ -48,7 +48,7 @@ export default function Duels() {
   }
 
   return (
-    <div className="dark:bg-gray-800 shadow-sm rounded-lg p-6">
+    <div className="bg-white/70 dark:bg-gray-800/70 shadow-sm rounded-lg p-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">対戦記録</h1>
         <Link 
@@ -81,8 +81,8 @@ export default function Duels() {
         </div>
       ) : (
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-            <thead className="bg-gray-50 dark:bg-gray-700">
+          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700 table-bg-transparent">
+            <thead className="bg-gray-50/90 dark:bg-gray-700/90">
               <tr>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                   日時

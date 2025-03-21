@@ -311,7 +311,7 @@ export default function Stats() {
   }
 
   return (
-    <div className="dark:bg-gray-800 shadow-sm rounded-lg p-6">
+    <div className="bg-white/70 dark:bg-gray-800/70 shadow-sm rounded-lg p-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">デュエル統計</h1>
       </div>
@@ -430,11 +430,11 @@ export default function Stats() {
           </div>
           
           {/* デッキ別詳細 */}
-          <div className="mb-8">
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">デッキ別詳細</h3>
+          <div className="card-bg-transparent shadow rounded-lg p-6 mb-8">
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">デッキ別成績</h3>
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                <thead className="bg-gray-50 dark:bg-gray-700">
+              <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700 table-bg-transparent">
+                <thead className="bg-gray-50/90 dark:bg-gray-700/90">
                   <tr>
                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                       デッキ
@@ -477,11 +477,11 @@ export default function Stats() {
           </div>
           
           {/* 対戦相手デッキ別詳細 */}
-          <div>
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">対戦相手デッキ別詳細</h3>
+          <div className="card-bg-transparent shadow rounded-lg p-6">
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">対戦相手デッキ別成績</h3>
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                <thead className="bg-gray-50 dark:bg-gray-700">
+              <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700 table-bg-transparent">
+                <thead className="bg-gray-50/90 dark:bg-gray-700/90">
                   <tr>
                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                       デッキタイプ

@@ -37,7 +37,24 @@ body::before {
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  opacity: 0.15; /* 薄く表示 */
-  z-index: -1;
+  opacity: 0.25; /* 不透明度を上げる（0.15→0.25） */
+  z-index: 0;
   pointer-events: none;
+}
+
+/* テーブルやカードの半透明化 */
+.table-bg-transparent tbody tr {
+  background-color: rgba(255, 255, 255, 0.7) !important;
+}
+
+.dark .table-bg-transparent tbody tr {
+  background-color: rgba(31, 41, 55, 0.7) !important;
+}
+
+.card-bg-transparent {
+  background-color: rgba(255, 255, 255, 0.7) !important;
+}
+
+.dark .card-bg-transparent {
+  background-color: rgba(31, 41, 55, 0.7) !important;
 }
