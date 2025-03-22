@@ -81,8 +81,8 @@ export default function Navigation() {
                       <Image
                         src="/stats-logo.png"
                         alt="Master Duel Stats"
-                        width={isMobile ? 180 : 220}
-                        height={isMobile ? 40 : 50}
+                        width={isMobile ? 180 : 320}
+                        height={isMobile ? 40 : 70}
                         className="h-9 sm:h-11 w-auto drop-shadow-md"
                         priority
                       />

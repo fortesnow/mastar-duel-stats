@@ -9,7 +9,8 @@ import {
   where, 
   orderBy,
   serverTimestamp,
-  Timestamp
+  Timestamp,
+  getDoc
 } from 'firebase/firestore';
 import { db } from './firebase';
 import { Deck, DuelRecord } from '../types';
@@ -139,4 +140,21 @@ export const getOpponentDeckNames = async (userId: string) => {
     );
   
   return deckNames;
+};
+
+// 特定のデュエル記録を取得
+export const getDuelRecord = async (userId: string, duelId: string) => {
+  const duelRef = doc(db, getUserDuelsPath(userId), duelId);
+  const duelSnapshot = await getDoc(duelRef);
+  
+  if (!duelSnapshot.exists()) {
+    throw new Error('デュエル記録が見つかりません');
+  }
+  
+  const data = duelSnapshot.data();
+  return {
+    id: duelSnapshot.id,
+    ...data,
+    timestamp: data.timestamp ? (data.timestamp as Timestamp).toDate() : new Date()
+  } as DuelRecord;
 }; 
