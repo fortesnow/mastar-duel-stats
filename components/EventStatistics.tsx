@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Event, EventStatistics, DuelRecord, Deck } from '../types';
+import { useState, useEffect, useCallback } from 'react';
+import { Event, EventStatistics, Deck } from '../types';
 import { 
   getUserEvents, 
   getEventDuelRecords, 
@@ -21,7 +21,7 @@ export default function EventStatisticsComponent({ userId }: EventStatisticsProp
   const [isLoading, setIsLoading] = useState(true);
 
   // データを読み込み
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     try {
       setIsLoading(true);
       const [eventsData, decksData] = await Promise.all([
@@ -50,11 +50,11 @@ export default function EventStatisticsComponent({ userId }: EventStatisticsProp
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [userId]);
 
   useEffect(() => {
     loadData();
-  }, [userId]);
+  }, [userId, loadData]);
 
   // 選択されたイベントの統計を取得
   const selectedStats = eventStats.find(stat => stat.eventId === selectedEventId);

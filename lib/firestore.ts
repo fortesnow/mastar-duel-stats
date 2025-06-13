@@ -117,7 +117,7 @@ export const getOrCreateDefaultEvent = async (userId: string) => {
   const defaultEventData = {
     name: '通常対戦',
     description: 'デフォルトの対戦記録',
-    startDate: serverTimestamp(),
+    startDate: new Date(),
     isActive: true,
     isDefault: true
   };

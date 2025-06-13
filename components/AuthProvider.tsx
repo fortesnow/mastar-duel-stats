@@ -36,6 +36,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const [redirectProcessed, setRedirectProcessed] = useState(false);
   const [redirectCheckAttempts, setRedirectCheckAttempts] = useState(0);
+  const [initialized, setInitialized] = useState(false);
 
   // エラーをクリアする関数
   const clearAuthError = useCallback(() => {
@@ -43,7 +44,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   // リダイレクト結果を処理する関数
-  const processRedirectResult = async () => {
+  const processRedirectResult = useCallback(async () => {
     // すでに処理済みの場合はスキップ
     if (redirectProcessed && redirectCheckAttempts > 1) return;
     
@@ -82,7 +83,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }, 1000);
       }
     }
-  };
+  }, [router, redirectProcessed, redirectCheckAttempts]);
 
   useEffect(() => {
     console.log('AuthProvider マウント - 現在のパス:', pathname);
@@ -153,6 +154,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         console.error('初期化エラー:', err);
         setLoading(false);
         setAuthError('認証システムの初期化に失敗しました。');
+      } finally {
+        setInitialized(true);
       }
     };
     
@@ -165,6 +168,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     };
   }, [router, pathname, redirectProcessed, redirectCheckAttempts]);
+
+  useEffect(() => {
+    if (!initialized) return;
+    processRedirectResult();
+  }, [initialized]);
 
   return (
     <AuthContext.Provider value={{ user, firebaseUser, loading, authError, clearAuthError }}>
