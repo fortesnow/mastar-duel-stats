@@ -10,6 +10,20 @@ export interface User {
   };
 }
 
+// イベントの型定義
+export interface Event {
+  id: string;
+  userId: string;
+  name: string;
+  description: string;
+  startDate: Date;
+  endDate?: Date;
+  isActive: boolean;
+  isDefault: boolean; // デフォルトイベント（通常の対戦）かどうか
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 // デッキの型定義
 export interface Deck {
   id: string;
@@ -27,6 +41,7 @@ export interface Deck {
 export interface DuelRecord {
   id: string;
   userId: string;
+  eventId: string; // どのイベントに属するかを示すID
   timestamp: Date;
   isFirstPlayer: boolean;
   result: 'win' | 'lose';
@@ -58,4 +73,10 @@ export interface Statistics {
       winRate: number;
     };
   };
+}
+
+// イベント別統計データの型定義
+export interface EventStatistics extends Statistics {
+  eventId: string;
+  eventName: string;
 } 

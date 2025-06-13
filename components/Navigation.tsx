@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { Disclosure, Menu, Transition } from '@headlessui/react';
-import { Bars3Icon, XMarkIcon, HomeIcon, ChartBarIcon, BookOpenIcon, UserIcon, ArrowRightOnRectangleIcon } from '@heroicons/react/24/outline';
+import { Bars3Icon, XMarkIcon, HomeIcon, ChartBarIcon, BookOpenIcon, UserIcon, ArrowRightOnRectangleIcon, CalendarIcon } from '@heroicons/react/24/outline';
 import { useAuth } from './AuthProvider';
 import { signOutUser as signOut } from '../lib/auth';
 
@@ -37,6 +37,7 @@ export default function Navigation() {
     { name: 'ホーム', href: '/', current: pathname === '/', icon: HomeIcon },
     { name: '対戦記録', href: '/duels', current: pathname === '/duels' || pathname.startsWith('/duels/'), icon: BookOpenIcon },
     { name: '統計', href: '/stats', current: pathname === '/stats', icon: ChartBarIcon },
+    { name: 'イベント管理', href: '/events', current: pathname === '/events' || pathname.startsWith('/events/'), icon: CalendarIcon },
     { name: 'デッキ管理', href: '/decks', current: pathname === '/decks' || pathname.startsWith('/decks/'), icon: UserIcon },
   ];
 
@@ -81,8 +82,8 @@ export default function Navigation() {
                       <Image
                         src="/stats-logo.png"
                         alt="Master Duel Stats"
-                        width={isMobile ? 180 : 320}
-                        height={isMobile ? 40 : 70}
+                        width={isMobile ? 180 : 220}
+                        height={isMobile ? 40 : 50}
                         className="h-9 sm:h-11 w-auto drop-shadow-md"
                         priority
                       />

@@ -3,8 +3,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../../../../components/AuthProvider';
-import { getUserDecks, addDuelRecord, getOpponentDeckNames } from '../../../../lib/firestore';
-import { Deck } from '../../../../types';
+import { getUserDecks, addDuelRecord, getOpponentDeckNames, getOrCreateDefaultEvent } from '../../../../lib/firestore';
+import { Deck, Event } from '../../../../types';
 import { MdArrowForward, MdCheckCircle, MdCancel, MdAdd, MdHistory } from 'react-icons/md';
 
 export default function NewDuelRecord() {
@@ -25,6 +25,9 @@ export default function NewDuelRecord() {
   const [filteredOpponentDecks, setFilteredOpponentDecks] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   
+  // 現在のイベント
+  const [currentEvent, setCurrentEvent] = useState<Event | null>(null);
+  
   // 送信状態
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
@@ -39,12 +42,16 @@ export default function NewDuelRecord() {
       if (authLoading || !user?.id) return;
       
       try {
-        const [userDecks, opponentDecks] = await Promise.all([
+        const [userDecks, event] = await Promise.all([
           getUserDecks(user.id),
-          getOpponentDeckNames(user.id)
+          getOrCreateDefaultEvent(user.id) // アクティブイベントまたはデフォルトイベントを取得
         ]);
         
+        // アクティブイベントのデータで対戦相手デッキを取得
+        const opponentDecks = await getOpponentDeckNames(user.id, event.id);
+        
         setDecks(userDecks);
+        setCurrentEvent(event);
         setPastOpponentDecks(opponentDecks);
         setFilteredOpponentDecks(opponentDecks);
         
@@ -107,7 +114,7 @@ export default function NewDuelRecord() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!user?.id) return;
+    if (!user?.id || !currentEvent) return;
     
     if (!ownDeckId) {
       setError('使用デッキを選択してください');
@@ -124,6 +131,7 @@ export default function NewDuelRecord() {
       setError('');
       
       await addDuelRecord(user.id, {
+        eventId: currentEvent.id, // 現在のアクティブイベントIDを含める
         isFirstPlayer,
         result,
         ownDeckId,
@@ -156,6 +164,20 @@ export default function NewDuelRecord() {
         </span>
         {step === 1 ? 'デッキ選択' : '対戦結果記録'}
       </h1>
+      
+      {/* 現在のイベント表示 */}
+      {currentEvent && (
+        <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900 border border-blue-200 dark:border-blue-700 rounded-lg">
+          <p className="text-sm text-blue-800 dark:text-blue-200">
+            <span className="font-medium">現在のイベント:</span> {currentEvent.name}
+          </p>
+          {currentEvent.description && (
+            <p className="text-xs text-blue-600 dark:text-blue-300 mt-1">
+              {currentEvent.description}
+            </p>
+          )}
+        </div>
+      )}
       
       {error && (
         <div className="bg-red-50 dark:bg-red-900 p-4 rounded-md mb-6 flex items-center border-l-4 border-red-600 dark:border-red-400">
