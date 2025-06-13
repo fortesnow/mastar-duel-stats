@@ -3,9 +3,10 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../../../../components/AuthProvider';
-import { getUserDecks, addDuelRecord, getOpponentDeckNames, getOrCreateDefaultEvent } from '../../../../lib/firestore';
+import { getUserDecks, addDuelRecord, getOpponentDeckNames, getUserEvents } from '../../../../lib/firestore';
 import { Deck, Event } from '../../../../types';
 import { MdArrowForward, MdCheckCircle, MdCancel, MdAdd, MdHistory } from 'react-icons/md';
+import { tierDecks } from '../../../../lib/tierDecks';
 
 export default function NewDuelRecord() {
   const { user, loading: authLoading } = useAuth();
@@ -36,22 +37,29 @@ export default function NewDuelRecord() {
   // UI参照
   const opponentInputRef = useRef<HTMLInputElement>(null);
   
+  // イベント一覧
+  const [events, setEvents] = useState<Event[]>([]);
+  const [selectedEventId, setSelectedEventId] = useState<string>('');
+  const [showTierDecks, setShowTierDecks] = useState(false);
+  
   // ユーザーのデッキと過去の対戦相手デッキを取得
   useEffect(() => {
     const fetchData = async () => {
       if (authLoading || !user?.id) return;
       
       try {
-        const [userDecks, event] = await Promise.all([
+        const [userDecks, eventList] = await Promise.all([
           getUserDecks(user.id),
-          getOrCreateDefaultEvent(user.id) // アクティブイベントまたはデフォルトイベントを取得
+          getUserEvents(user.id)
         ]);
         
-        // アクティブイベントのデータで対戦相手デッキを取得
-        const opponentDecks = await getOpponentDeckNames(user.id, event.id);
-        
         setDecks(userDecks);
-        setCurrentEvent(event);
+        setEvents(eventList);
+        // デフォルトはアクティブイベント
+        const active = eventList.find(e => e.isActive) || eventList[0];
+        setSelectedEventId(active?.id || '');
+        setCurrentEvent(active || null);
+        const opponentDecks = await getOpponentDeckNames(user.id, active?.id);
         setPastOpponentDecks(opponentDecks);
         setFilteredOpponentDecks(opponentDecks);
         
@@ -114,7 +122,7 @@ export default function NewDuelRecord() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!user?.id || !currentEvent) return;
+    if (!user?.id || !selectedEventId) return;
     
     if (!ownDeckId) {
       setError('使用デッキを選択してください');
@@ -131,7 +139,7 @@ export default function NewDuelRecord() {
       setError('');
       
       await addDuelRecord(user.id, {
-        eventId: currentEvent.id, // 現在のアクティブイベントIDを含める
+        eventId: selectedEventId,
         isFirstPlayer,
         result,
         ownDeckId,
@@ -230,6 +238,26 @@ export default function NewDuelRecord() {
                 </div>
               )}
             </div>
+            
+            {/* イベント選択 */}
+            {events.length > 0 && (
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-1">保存先イベント</label>
+                <select
+                  value={selectedEventId}
+                  onChange={e => {
+                    setSelectedEventId(e.target.value);
+                    const ev = events.find(ev => ev.id === e.target.value) || null;
+                    setCurrentEvent(ev);
+                  }}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                >
+                  {events.map(ev => (
+                    <option key={ev.id} value={ev.id}>{ev.name}</option>
+                  ))}
+                </select>
+              </div>
+            )}
             
             {/* ナビゲーションボタン */}
             <div className="flex justify-end pt-4">
@@ -400,6 +428,34 @@ export default function NewDuelRecord() {
                 placeholder="対戦の特記事項があれば記入してください"
                 disabled={isSubmitting}
               />
+            </div>
+            
+            {/* 環境デッキから選ぶ */}
+            <div className="mt-4">
+              <button
+                type="button"
+                onClick={() => setShowTierDecks(!showTierDecks)}
+                className="px-3 py-1 bg-blue-100 rounded hover:bg-blue-200"
+              >
+                環境デッキから選ぶ
+              </button>
+              {showTierDecks && (
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-2 bg-white p-4 rounded shadow-lg z-10">
+                  {tierDecks.map(deck => (
+                    <div
+                      key={deck.name}
+                      className="cursor-pointer flex flex-col items-center hover:bg-blue-50 rounded p-2"
+                      onClick={() => {
+                        setOpponentDeckName(deck.name);
+                        setShowTierDecks(false);
+                      }}
+                    >
+                      <img src={deck.image} alt={deck.name} className="w-16 h-16 object-contain mb-1" />
+                      <span className="text-xs">{deck.name}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
             
             {/* ナビゲーションボタン */}
